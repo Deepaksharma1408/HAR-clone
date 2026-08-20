@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #F6F4EF;
+  --surface: #FFFFFF;
+  --ink: #16231C;
+  --ink-soft: #4B564E;
+  --line: #DAD5C8;
+  --brass: #B8862E;
+  --brass-deep: #8F6A22;
+  --sage: #5C7266;
+  --sage-soft: #E4E9E2;
+  --danger: #B4432E;
+}
+
+@theme {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
+  --color-line: var(--line);
+  --color-brass: var(--brass);
+  --color-brass-deep: var(--brass-deep);
+  --color-sage: var(--sage);
+  --color-sage-soft: var(--sage-soft);
+  --color-danger: var(--danger);
+
+  --font-fraunces: var(--font-fraunces), serif;
+  --font-inter: var(--font-inter), sans-serif;
+  --font-mono: var(--font-mono), monospace;
+
+  /* Force 2px border radius everywhere */
+  --radius-none: 0px;
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
+  --radius-full: 9999px; /* keep full for circles */
+  --radius-sharp: 2px;
+}
+
+body {
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-inter), sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge and Firefox */
+.scrollbar-none {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-fraunces), serif;
+  letter-spacing: -0.015em;
+}
+
+/* Hairline border helper */
+.hairline {
+  border: 1px solid var(--line);
+}
+
+/* 75vh Smooth Live Background Panning (Left -> Right -> Left) */
+@keyframes livePanLeftRight {
+  0% {
+    transform: scale(1.18) translateX(-7%);
+  }
+  50% {
+    transform: scale(1.18) translateX(7%);
+  }
+  100% {
+    transform: scale(1.18) translateX(-7%);
+  }
+}
+
+.animate-live-pan {
+  animation: livePanLeftRight 20s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Card hover utility */
+.card-hover {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
+}
+.card-hover:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 10px 25px -10px rgba(22, 35, 28, 0.12), 0 1px 2px rgba(22, 35, 28, 0.04);
+}
+
+/* Container max-width utility */
+.estateline-container {
+  max-w: 1240px;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* Scroll reveal utility classes */
+@keyframes reveal-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal-active {
+  animation: reveal-fade-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.reveal-hidden {
+  opacity: 0;
+}
+
+/* Live moving hero background animation */
+@keyframes live-hero-zoom {
+  0% {
+    transform: scale(1) translate(0%, 0%);
+  }
+  50% {
+    transform: scale(1.12) translate(-1.5%, -1%);
+  }
+  100% {
+    transform: scale(1) translate(0%, 0%);
+  }
+}
+
+.animate-live-hero {
+  animation: live-hero-zoom 25s ease-in-out infinite alternate;
+}
