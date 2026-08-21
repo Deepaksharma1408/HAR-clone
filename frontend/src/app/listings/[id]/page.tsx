@@ -271,10 +271,10 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Photo Gallery Grid with Crossfade Transitions */}
-        <section className="relative isolate z-0 w-full mb-8 space-y-3">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[360px] sm:h-[420px] md:h-[480px] rounded-2xl overflow-hidden">
+        <section className="relative isolate z-0 w-full mb-8 space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[420px] sm:h-[480px] md:h-[540px] rounded-2xl overflow-hidden">
             {/* Main Large Photo */}
-            <div className="md:col-span-2 h-full overflow-hidden rounded-2xl bg-bg relative group">
+            <div className="md:col-span-2 h-full overflow-hidden rounded-2xl bg-bg relative group border border-line">
               <AnimatePresence mode="wait">
                 {listing.images && listing.images.length > 0 ? (
                   <motion.img
@@ -310,7 +310,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                       e.stopPropagation();
                       setActivePhotoIndex((prev) => (prev - 1 + listing.images.length) % listing.images.length);
                     }}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-brass text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs shadow-md font-bold text-lg"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-brass text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs shadow-lg font-bold text-xl"
                     aria-label="Previous Photo"
                   >
                     ‹
@@ -320,7 +320,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                       e.stopPropagation();
                       setActivePhotoIndex((prev) => (prev + 1) % listing.images.length);
                     }}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-brass text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs shadow-md font-bold text-lg"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/60 hover:bg-brass text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs shadow-lg font-bold text-xl"
                     aria-label="Next Photo"
                   >
                     ›
@@ -332,42 +332,42 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               <div className="absolute bottom-3 left-3 flex items-center gap-2">
                 <button
                   onClick={() => setShowLightbox(true)}
-                  className="bg-black/60 hover:bg-black/80 backdrop-blur-xs text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
+                  className="bg-black/70 hover:bg-black/90 backdrop-blur-xs text-white text-xs font-medium px-3.5 py-1.5 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer shadow-md"
                 >
                   <span>⛶</span>
                   <span>View Full Photo</span>
                 </button>
               </div>
 
-              <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-xs text-white text-xs font-medium px-3 py-1.5 rounded-full pointer-events-none">
+              <div className="absolute bottom-3 right-3 bg-black/70 backdrop-blur-xs text-white text-xs font-medium px-3 py-1.5 rounded-full pointer-events-none shadow-md">
                 Photo {(activePhotoIndex % Math.max(1, listing.images?.length || 3)) + 1} of {Math.max(1, listing.images?.length || 3)}
               </div>
             </div>
 
-            {/* Dynamic Side Photo Grid - Displays the OTHER available images and swaps on click */}
+            {/* Dynamic Side Photo Column - Two equal 50/50 slots */}
             {(() => {
               const totalImgs = listing.images?.length || 0;
               const slot1Index = totalImgs > 1 ? (activePhotoIndex + 1) % totalImgs : 0;
               const slot2Index = totalImgs > 2 ? (activePhotoIndex + 2) % totalImgs : slot1Index;
 
               return (
-                <div className="grid grid-rows-2 gap-4 h-full">
+                <div className="hidden md:flex flex-col gap-4 h-full min-h-0">
                   {/* Side Slot 1 */}
                   <div
                     onClick={() => totalImgs > 1 && setActivePhotoIndex(slot1Index)}
-                    className="h-full overflow-hidden rounded-2xl bg-bg relative cursor-pointer group transition-all duration-300 border border-line hover:border-brass shadow-xs hover:shadow-md"
+                    className="flex-1 min-h-0 overflow-hidden rounded-2xl bg-bg relative cursor-pointer group transition-all duration-300 border border-line hover:border-brass shadow-xs hover:shadow-md"
                     title="Click to view this photo in main display"
                   >
                     {listing.images && listing.images.length > slot1Index ? (
                       <img
                         src={getImageUrl(listing.images[slot1Index].image_url)}
                         alt={`${listing.address} photo ${slot1Index + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <HouseSVGPlaceholder hue={galleryHues[1]} className="h-full" />
                     )}
-                    <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium px-2 py-0.5 rounded-md">
+                    <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-xs text-white text-[11px] font-medium px-2 py-0.5 rounded-md shadow-xs">
                       Photo {slot1Index + 1}
                     </div>
                   </div>
@@ -375,19 +375,19 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                   {/* Side Slot 2 */}
                   <div
                     onClick={() => totalImgs > 2 && setActivePhotoIndex(slot2Index)}
-                    className="h-full overflow-hidden rounded-2xl bg-bg relative cursor-pointer group transition-all duration-300 border border-line hover:border-brass shadow-xs hover:shadow-md"
+                    className="flex-1 min-h-0 overflow-hidden rounded-2xl bg-bg relative cursor-pointer group transition-all duration-300 border border-line hover:border-brass shadow-xs hover:shadow-md"
                     title="Click to view this photo in main display"
                   >
                     {listing.images && listing.images.length > slot2Index ? (
                       <img
                         src={getImageUrl(listing.images[slot2Index].image_url)}
                         alt={`${listing.address} photo ${slot2Index + 1}`}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
                       />
                     ) : (
                       <HouseSVGPlaceholder hue={galleryHues[2]} className="h-full" />
                     )}
-                    <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium px-2 py-0.5 rounded-md">
+                    <div className="absolute bottom-2 right-2 bg-black/70 backdrop-blur-xs text-white text-[11px] font-medium px-2 py-0.5 rounded-md shadow-xs">
                       Photo {slot2Index + 1}
                     </div>
                   </div>
