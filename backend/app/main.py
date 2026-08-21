@@ -2,7 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from .routers import health, auth, listings, leads, favorites, alerts
+from .routers import health, auth, listings, leads, favorites, alerts, valuation, open_houses, community
 from .database import Base, engine
 from .scheduler import start_scheduler
 
@@ -49,6 +49,9 @@ app.include_router(leads.router)
 app.include_router(leads.mine_router)
 app.include_router(favorites.router)
 app.include_router(alerts.router)
+app.include_router(valuation.router)
+app.include_router(open_houses.router)
+app.include_router(community.router)
 
 @app.get("/")
 def read_root():

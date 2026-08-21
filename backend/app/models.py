@@ -51,6 +51,7 @@ class Listing(Base):
     lot_size = Column(Float, nullable=True)
     description = Column(Text, nullable=True)
     hue_color = Column(String, nullable=True)  # For placeholder art
+    open_house_time = Column(String, nullable=True)  # e.g., "Saturday, 10:00 AM – 2:00 PM"
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
 
     # Relationships
@@ -59,6 +60,7 @@ class Listing(Base):
     price_history = relationship("PriceHistoryEntry", back_populates="listing", cascade="all, delete-orphan")
     favorites = relationship("Favorite", back_populates="listing", cascade="all, delete-orphan")
     leads = relationship("Lead", back_populates="listing", cascade="all, delete-orphan")
+    open_house_rsvps = relationship("OpenHouseRSVP", back_populates="listing", cascade="all, delete-orphan")
 
 
 class ListingImage(Base):
@@ -113,6 +115,41 @@ class Lead(Base):
     listing = relationship("Listing", back_populates="leads")
 
 
+class SellerLead(Base):
+    __tablename__ = "seller_leads"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=True)
+    address = Column(String, nullable=False)
+    city = Column(String, default="Houston", nullable=False)
+    beds = Column(String, nullable=True)
+    baths = Column(String, nullable=True)
+    sqft = Column(Integer, nullable=True)
+    property_condition = Column(String, nullable=True)
+    timeline = Column(String, nullable=True)
+    notes = Column(Text, nullable=True)
+    status = Column(String, default="new", nullable=False)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+
+class OpenHouseRSVP(Base):
+    __tablename__ = "open_house_rsvps"
+
+    id = Column(Integer, primary_key=True, index=True)
+    listing_id = Column(Integer, ForeignKey("listings.id", ondelete="CASCADE"), nullable=False)
+    name = Column(String, nullable=False)
+    email = Column(String, nullable=False)
+    phone = Column(String, nullable=True)
+    attendees = Column(Integer, default=1, nullable=False)
+    preferred_time = Column(String, nullable=True)
+    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+
+    # Relationships
+    listing = relationship("Listing", back_populates="open_house_rsvps")
+
+
 class SavedAlert(Base):
     __tablename__ = "saved_alerts"
 
@@ -125,3 +162,4 @@ class SavedAlert(Base):
 
     # Relationships
     user = relationship("User", back_populates="saved_alerts")
+

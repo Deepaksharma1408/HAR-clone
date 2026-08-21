@@ -1,20 +1,22 @@
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models import User, Favorite, Listing
 from ..schemas import ListingResponse
-from .auth import get_current_user
+from .auth import get_current_user, get_optional_user
 
 router = APIRouter(prefix="/favorites", tags=["favorites"])
 
 # GET /favorites - Get current user's favorited listings
 @router.get("", response_model=List[ListingResponse])
 def get_user_favorites(
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_user),
     db: Session = Depends(get_db)
 ):
+    if not current_user:
+        return []
     favorites = db.query(Favorite).filter(Favorite.user_id == current_user.id).all()
     listings = [fav.listing for fav in favorites if fav.listing]
     return listings

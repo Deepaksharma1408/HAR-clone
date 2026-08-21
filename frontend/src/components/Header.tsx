@@ -318,18 +318,61 @@ export const Header: React.FC = () => {
                   exit={{ opacity: 0, scale: 0.96, y: -4 }}
                   transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
                   style={{ transformOrigin: "top" }}
-                  className="absolute top-full right-0 w-56 bg-surface border border-line rounded-xl shadow-xl py-2 z-50 space-y-1 mt-0"
+                  className="absolute top-full right-0 w-64 bg-surface border border-line rounded-xl shadow-xl py-2 z-50 space-y-1 mt-0 font-inter text-xs"
                 >
                   <Link
+                    href="/open-houses"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    🗓️ Weekend Open Houses
+                  </Link>
+                  <Link
+                    href="/sell"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    🏷️ Sell &amp; List Your Home
+                  </Link>
+                  <Link
+                    href="/neighborhoods"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    🏘️ Neighborhood Explorer
+                  </Link>
+                  <Link
+                    href="/schools"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    🎓 Texas School Finder
+                  </Link>
+                  <Link
+                    href="/drive-time"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    ⏱️ Commute &amp; Drive-Time Search
+                  </Link>
+                  <Link
+                    href="/compare"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    onClick={() => setMoreOpen(false)}
+                  >
+                    ⚖️ Side-by-Side Property Comparison
+                  </Link>
+                  <div className="border-t border-line my-1"></div>
+                  <Link
                     href="/account/alerts"
-                    className="block px-4 py-2.5 hover:bg-bg hover:text-brass text-ink font-medium text-sm transition-colors"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
                     onClick={() => setMoreOpen(false)}
                   >
                     🔔 Saved Search Alerts
                   </Link>
                   <Link
                     href="/account/favorites"
-                    className="block px-4 py-2.5 hover:bg-bg hover:text-brass text-ink font-medium text-sm transition-colors"
+                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
                     onClick={() => setMoreOpen(false)}
                   >
                     ♥ Saved Favorites ({favoriteCount})
@@ -337,7 +380,7 @@ export const Header: React.FC = () => {
                   {user?.role === "agent" && (
                     <Link
                       href="/dashboard"
-                      className="block px-4 py-2.5 hover:bg-bg hover:text-brass text-ink font-medium text-sm transition-colors"
+                      className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors font-bold text-brass"
                       onClick={() => setMoreOpen(false)}
                     >
                       🏛 Agent Control Panel
@@ -445,24 +488,42 @@ export const Header: React.FC = () => {
             )}
           </div>
 
-          {/* List Property Brass Button - Hidden only for Buyers */}
+          {/* List Property Brass Button - Shown on Desktop md+ */}
           {(!user || user?.role === "agent") && (
-            <MagneticButton>
-              <Button
-                variant="brass"
-                size="md"
-                onClick={handleListPropertyClick}
-                className="hidden sm:inline-flex text-[14px] font-bold px-4 py-2.5 uppercase tracking-wide cursor-pointer"
-              >
-                List Property
-              </Button>
-            </MagneticButton>
+            <div className="hidden md:block">
+              <MagneticButton>
+                <Button
+                  variant="brass"
+                  size="md"
+                  onClick={handleListPropertyClick}
+                  className="text-[14px] font-bold px-4 py-2.5 uppercase tracking-wide cursor-pointer"
+                >
+                  List Property
+                </Button>
+              </MagneticButton>
+            </div>
           )}
+
+          {/* Mobile Heart Favorites Icon */}
+          <Link
+            href="/account/favorites"
+            className="md:hidden relative p-2 text-ink hover:text-danger transition-colors flex items-center"
+            title="Saved Favorites"
+          >
+            <svg className="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            {favoriteCount > 0 && (
+              <span className="absolute -top-1 -right-1 px-1.5 py-0.2 bg-brass text-white text-[10px] font-inter rounded-full min-w-[16px] text-center font-bold">
+                {favoriteCount}
+              </span>
+            )}
+          </Link>
 
           {/* Mobile Hamburger Menu Toggle Button */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="md:hidden text-ink hover:text-brass p-2 rounded-md border border-line focus:outline-none cursor-pointer"
+            className="md:hidden text-ink hover:text-brass p-2 rounded-lg border border-line focus:outline-none cursor-pointer flex items-center justify-center bg-surface"
             aria-label="Toggle Mobile Menu"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -522,8 +583,26 @@ export const Header: React.FC = () => {
               </div>
 
               <div className="space-y-2 border-b border-line pb-4">
-                <span className="text-xs font-semibold text-brass block">Real Estate Tools</span>
-                <Link href="/compare" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 font-medium text-ink hover:text-brass">
+                <span className="text-xs font-semibold text-brass block">Real Estate Tools &amp; Discovery</span>
+                <Link href="/open-houses" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                  🗓️ Weekend Open Houses
+                </Link>
+                <Link href="/sell" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                  🏷️ Sell &amp; List Your Home
+                </Link>
+                <Link href="/home-value" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                  📈 Home Valuation Estimator
+                </Link>
+                <Link href="/neighborhoods" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                  🏘️ Neighborhood Explorer
+                </Link>
+                <Link href="/schools" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                  🎓 Texas School Finder
+                </Link>
+                <Link href="/drive-time" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                  ⏱️ Commute &amp; Drive-Time Search
+                </Link>
+                <Link href="/compare" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
                   📊 Side-by-Side Property Comparison
                 </Link>
                 <button
@@ -531,20 +610,11 @@ export const Header: React.FC = () => {
                     setMobileMenuOpen(false);
                     setShowMortgageModal(true);
                   }}
-                  className="block w-full text-left py-1.5 font-medium text-ink hover:text-brass cursor-pointer"
+                  className="block w-full text-left py-1 font-medium text-ink hover:text-brass cursor-pointer"
                 >
                   🧮 30-Year Mortgage Calculator
                 </button>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setShowHomeValuationModal(true);
-                  }}
-                  className="block w-full text-left py-1.5 font-medium text-ink hover:text-brass cursor-pointer"
-                >
-                  📈 Instant Home Valuation
-                </button>
-                <Link href="/agents" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 font-medium text-ink hover:text-brass">
+                <Link href="/agents" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
                   🏛 Real Estate Agents Directory
                 </Link>
               </div>

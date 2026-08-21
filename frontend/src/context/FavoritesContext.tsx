@@ -48,9 +48,15 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
 
     setLoading(true);
     try {
+      const headers: Record<string, string> = { "Content-Type": "application/json" };
+      if (typeof window !== "undefined") {
+        const token = localStorage.getItem("estateline_token");
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+      }
+
       const res = await fetch(`${API_URL}/favorites`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers,
         credentials: "include",
       });
 
@@ -58,9 +64,12 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         const data: ListingItem[] = await res.json();
         setFavoriteListings(data || []);
         setFavoriteIds((data || []).map((item) => item.id));
+      } else if (res.status === 401) {
+        setFavoriteListings([]);
+        setFavoriteIds([]);
       }
-    } catch (err) {
-      console.error("Error loading user favorites:", err);
+    } catch {
+      // Silently handle network interruptions for unauthenticated guests
     } finally {
       setLoading(false);
     }

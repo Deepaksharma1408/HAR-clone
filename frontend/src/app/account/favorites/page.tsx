@@ -10,6 +10,7 @@ import { EyebrowLabel } from "@/components/EyebrowLabel";
 import { HouseSVGPlaceholder } from "@/components/HouseSVGPlaceholder";
 import { useAuth } from "@/context/AuthContext";
 import { useFavorites } from "@/context/FavoritesContext";
+import { getImageUrl } from "@/lib/config";
 
 export default function AccountFavoritesPage() {
   const router = useRouter();
@@ -98,12 +99,15 @@ export default function AccountFavoritesPage() {
                       <div className="h-48 w-full relative mb-3 overflow-hidden rounded-xl bg-bg">
                         {item.images && item.images.length > 0 ? (
                           <img
-                            src={item.images[0].image_url}
+                            src={getImageUrl(item.images[0].image_url)}
                             alt={item.address}
+                            onError={(e) => {
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80";
+                            }}
                             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                           />
                         ) : (
-                          <HouseSVGPlaceholder hue={item.hue_color || "var(--sage-soft)"} />
+                          <HouseSVGPlaceholder index={item.id} hue={item.hue_color || "var(--sage-soft)"} />
                         )}
                         <div className="absolute top-3 left-3 z-10">
                           <Badge variant={item.type === "For Rent" ? "sage" : "brass"}>

@@ -14,6 +14,7 @@ import { StaggerGrid, StaggerItem } from "@/components/StaggerGrid";
 import { ImageCurtainReveal } from "@/components/motion/ImageCurtainReveal";
 import { TextMaskReveal } from "@/components/motion/TextMaskReveal";
 import { useFavorites } from "@/context/FavoritesContext";
+import { getImageUrl } from "@/lib/config";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
 
@@ -219,6 +220,7 @@ function ListingsContent() {
 
   // Filter States
   const [cityInput, setCityInput] = useState(searchParams.get("city") || "");
+  const [appliedCity, setAppliedCity] = useState(searchParams.get("city") || "");
   const [selectedType, setSelectedType] = useState(searchParams.get("type") || "");
   const [tagInput, setTagInput] = useState(searchParams.get("tag") || "");
   const [maxPrice, setMaxPrice] = useState(searchParams.get("max_price") || "");
@@ -236,9 +238,21 @@ function ListingsContent() {
     }
   };
 
+  // Helper to format city names with proper Title Case (e.g. "jaipur" -> "Jaipur")
+  const formatCityTitle = (city: string) => {
+    if (!city) return "";
+    return city
+      .trim()
+      .split(" ")
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+      .join(" ");
+  };
+
   // Sync state with URL searchParams when navigation occurs
   useEffect(() => {
-    setCityInput(searchParams.get("city") || "");
+    const c = searchParams.get("city") || "";
+    setCityInput(c);
+    setAppliedCity(c);
     setSelectedType(searchParams.get("type") || "");
     setTagInput(searchParams.get("tag") || "");
     if (searchParams.get("sort")) setSortOption(searchParams.get("sort") || "newest");
@@ -259,7 +273,7 @@ function ListingsContent() {
       const params = new URLSearchParams();
       if (selectedType) params.append("type", selectedType);
       if (tagInput) params.append("tag", tagInput);
-      if (cityInput) params.append("city", cityInput);
+      if (appliedCity) params.append("city", appliedCity);
       if (maxPrice) params.append("max_price", maxPrice);
       if (minBeds) params.append("min_beds", minBeds);
       if (sortOption) params.append("sort", sortOption);
@@ -281,12 +295,12 @@ function ListingsContent() {
 
   useEffect(() => {
     fetchListings();
-  }, [selectedType, tagInput, cityInput, maxPrice, minBeds, sortOption, page]);
+  }, [selectedType, tagInput, appliedCity, maxPrice, minBeds, sortOption, page]);
 
   const handleCitySearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    setAppliedCity(cityInput.trim());
     setPage(1);
-    fetchListings();
   };
 
   const toggleAmenity = (name: string) => {
@@ -308,63 +322,65 @@ function ListingsContent() {
     <div className="estateline-container py-10">
       {/* 1. Feature Carousel Shortcut Toolbar on Listings Page */}
       <div className="mb-8 border-b border-line pb-6">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-xs font-mono uppercase tracking-wider text-ink-soft">
-            Explore Estateline Quick Tools & Feature Portfolios
-          </span>
-          <span className="text-xs font-inter font-bold text-brass">16 Features Active</span>
-        </div>
-
-        <div className="relative group">
-          {/* Left Scroll Button */}
-          <button
-            onClick={() => scrollShortcuts("left")}
-            className="absolute -left-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-surface border border-line text-ink flex items-center justify-center shadow-md hover:bg-brass hover:text-white transition-colors cursor-pointer"
-            aria-label="Scroll Left"
-          >
-            ‹
-          </button>
-
-          {/* Track */}
-          <div
-            ref={shortcutRef}
-            className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1.5 px-4 scroll-smooth"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {harToolShortcuts.map((tool, idx) => {
-              const isActive =
-                (tool.tag && tool.tag === tagInput) ||
-                (tool.type && tool.type === selectedType) ||
-                (tool.city && tool.city === cityInput) ||
-                (tool.sort && sortOption === "newest" && !tagInput && !selectedType && !cityInput);
-
-              return (
-                <Link
-                  key={idx}
-                  href={tool.link}
-                  className={`flex-shrink-0 px-4 py-2 rounded-full border text-xs font-inter font-bold flex items-center gap-2 transition-all cursor-pointer ${
-                    isActive
-                      ? "bg-ink text-white border-ink shadow-md"
-                      : "bg-surface text-ink border-line hover:border-brass hover:bg-bg"
-                  }`}
-                >
-                  <span className={`w-5 h-5 rounded-full ${tool.bg} text-white flex items-center justify-center text-[10px]`}>
-                    {tool.svg}
-                  </span>
-                  <span>{tool.label}</span>
-                </Link>
-              );
-            })}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3.5">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-mono uppercase tracking-wider text-ink-soft">
+              Explore Estateline Quick Tools & Feature Portfolios
+            </span>
+            <span className="text-xs font-inter font-bold text-brass bg-brass/10 px-2.5 py-0.5 rounded-full">
+              16 Features Active
+            </span>
           </div>
 
-          {/* Right Scroll Button */}
-          <button
-            onClick={() => scrollShortcuts("right")}
-            className="absolute -right-3 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-surface border border-line text-ink flex items-center justify-center shadow-md hover:bg-brass hover:text-white transition-colors cursor-pointer"
-            aria-label="Scroll Right"
-          >
-            ›
-          </button>
+          {/* Dedicated Side Navigation Arrows */}
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            <button
+              onClick={() => scrollShortcuts("left")}
+              className="w-8 h-8 rounded-full bg-surface border border-line text-ink hover:border-brass hover:bg-brass hover:text-white flex items-center justify-center transition-all cursor-pointer font-bold text-base shadow-xs"
+              aria-label="Scroll Left"
+            >
+              ‹
+            </button>
+            <button
+              onClick={() => scrollShortcuts("right")}
+              className="w-8 h-8 rounded-full bg-surface border border-line text-ink hover:border-brass hover:bg-brass hover:text-white flex items-center justify-center transition-all cursor-pointer font-bold text-base shadow-xs"
+              aria-label="Scroll Right"
+            >
+              ›
+            </button>
+          </div>
+        </div>
+
+        {/* Full-width Unobstructed Scroll Track */}
+        <div
+          ref={shortcutRef}
+          className="flex items-center gap-3 overflow-x-auto scrollbar-none py-1.5 scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {harToolShortcuts.map((tool, idx) => {
+            const isActive =
+              (tool.tag && tool.tag === tagInput) ||
+              (tool.type && tool.type === selectedType) ||
+              (tool.city && tool.city === cityInput) ||
+              (tool.sort && sortOption === "newest" && !tagInput && !selectedType && !cityInput);
+
+            return (
+              <Link
+                key={idx}
+                href={tool.link}
+                className={`flex-shrink-0 px-4 py-2 rounded-full border text-xs font-inter font-semibold flex items-center gap-2 transition-all cursor-pointer whitespace-nowrap ${
+                  isActive
+                    ? "bg-ink text-white border-ink shadow-md"
+                    : "bg-surface text-ink border-line hover:border-brass hover:bg-bg"
+                }`}
+              >
+                <span className={`w-5 h-5 rounded-full ${tool.bg} text-white flex items-center justify-center text-[10px]`}>
+                  {tool.svg}
+                </span>
+                <span>{tool.label}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
 
@@ -619,10 +635,10 @@ function ListingsContent() {
               ? "Foreclosed & Value Deals"
               : tagInput === "valuation"
               ? "Property Valuation Portfolio"
+              : appliedCity
+              ? `Properties of ${formatCityTitle(appliedCity)}`
               : selectedType
               ? `${selectedType} Portfolio`
-              : cityInput
-              ? `${cityInput} Properties`
               : "Search Properties"}
             <span className="text-brass">.</span>
           </h1>
@@ -677,12 +693,38 @@ function ListingsContent() {
 
             {/* City Search */}
             <form onSubmit={handleCitySearchSubmit}>
-              <Input
-                label="City / Location"
-                placeholder="Search Katy, Memorial..."
-                value={cityInput}
-                onChange={(e) => setCityInput(e.target.value)}
-              />
+              <div className="relative">
+                <Input
+                  label="City / Location"
+                  placeholder="Search Katy, Memorial, Jaipur..."
+                  value={cityInput}
+                  onChange={(e) => setCityInput(e.target.value)}
+                  className="pr-16"
+                />
+                <div className="absolute right-2 top-8 flex items-center gap-1">
+                  {cityInput && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setCityInput("");
+                        setAppliedCity("");
+                        setPage(1);
+                      }}
+                      className="p-1 text-xs text-ink-soft hover:text-ink cursor-pointer"
+                      title="Clear City Filter"
+                    >
+                      ✕
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="px-2.5 py-1 bg-brass hover:bg-brass-deep text-white text-xs font-semibold rounded-md transition-colors cursor-pointer shadow-xs"
+                    title="Search City"
+                  >
+                    Go
+                  </button>
+                </div>
+              </div>
             </form>
 
             {/* Property Type Chips */}
@@ -852,6 +894,7 @@ function ListingsContent() {
             </Card>
           ) : (
             <StaggerGrid
+              key={`${page}-${appliedCity}-${selectedType}-${tagInput}-${sortOption}`}
               className={
                 viewMode === "grid"
                   ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
@@ -894,12 +937,15 @@ function ListingsContent() {
                           <ImageCurtainReveal direction="up" className="h-44 w-full relative mb-3 rounded-xl bg-bg">
                             {item.images && item.images.length > 0 ? (
                               <img
-                                src={item.images[0].image_url}
+                                src={getImageUrl(item.images[0].image_url)}
                                 alt={item.address}
+                                onError={(e) => {
+                                  e.currentTarget.src = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80";
+                                }}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                               />
                             ) : (
-                              <HouseSVGPlaceholder hue={item.hue_color || "var(--sage-soft)"} />
+                              <HouseSVGPlaceholder index={item.id} hue={item.hue_color || "var(--sage-soft)"} />
                             )}
                             <div className="absolute top-3 left-3 z-10">
                               <Badge variant={item.type === "For Rent" ? "sage" : "brass"}>

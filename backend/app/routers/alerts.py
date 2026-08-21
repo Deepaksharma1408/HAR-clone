@@ -1,5 +1,5 @@
 import json
-from typing import List
+from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
@@ -13,7 +13,7 @@ from ..schemas import (
     ListingResponse
 )
 from ..services.listings_filter import build_listings_filter_query
-from .auth import get_current_user
+from .auth import get_current_user, get_optional_user
 
 router = APIRouter(prefix="/alerts", tags=["alerts"])
 
@@ -31,9 +31,11 @@ def parse_alert_response(alert: SavedAlert) -> SavedAlertResponse:
 # GET /alerts - Get user's saved alerts
 @router.get("", response_model=List[SavedAlertResponse])
 def get_user_alerts(
-    current_user: User = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_optional_user),
     db: Session = Depends(get_db)
 ):
+    if not current_user:
+        return []
     alerts = db.query(SavedAlert).filter(SavedAlert.user_id == current_user.id).order_by(SavedAlert.created_at.desc()).all()
     return [parse_alert_response(a) for a in alerts]
 

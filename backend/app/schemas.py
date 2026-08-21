@@ -212,3 +212,160 @@ class AlertMatchesResponse(BaseModel):
     name: str
     match_count: int
     matches: list[ListingResponse] = []
+
+
+# --- Seller Consultation / Valuation Request Schemas ---
+
+class SellerLeadCreate(BaseModel):
+    name: str
+    email: str
+    phone: str | None = None
+    address: str
+    city: str = "Houston"
+    beds: str | None = "4"
+    baths: str | None = "3"
+    sqft: int | None = 3000
+    property_condition: str | None = "Good"
+    timeline: str | None = "Within 30 Days"
+    notes: str | None = None
+
+class SellerLeadResponse(BaseModel):
+    id: int
+    name: str
+    email: str
+    phone: str | None = None
+    address: str
+    city: str
+    status: str
+    created_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
+# --- Valuation (AVM) Schemas ---
+
+class ValuationRequest(BaseModel):
+    address: str
+    city: str = "Katy"
+    beds: int = 4
+    baths: float = 3.0
+    sqft: int = 3000
+    condition: str = "Good"
+
+class ComparableProperty(BaseModel):
+    id: int
+    address: str
+    city: str
+    price: float
+    price_formatted: str
+    sqft: int | None = None
+    beds: int | None = None
+    baths: float | None = None
+    image_url: str | None = None
+
+class ValuationResponse(BaseModel):
+    address: str
+    city: str
+    estimated_value: int
+    estimated_value_formatted: str
+    low_range: int
+    low_range_formatted: str
+    high_range: int
+    high_range_formatted: str
+    price_per_sqft: int
+    confidence_score: int  # e.g., 94 (meaning 94%)
+    appreciation_1yr_pct: float
+    comparables: list[ComparableProperty] = []
+
+
+# --- Open House & RSVP Schemas ---
+
+class OpenHouseItemResponse(BaseModel):
+    id: int
+    listing_id: int
+    address: str
+    city: str
+    price: float
+    price_formatted: str
+    beds: int | None = None
+    baths: float | None = None
+    sqft: int | None = None
+    open_house_time: str
+    agent_name: str
+    agent_role: str
+    image_url: str
+
+class OpenHouseRSVPCreate(BaseModel):
+    listing_id: int
+    name: str
+    email: str
+    phone: str | None = None
+    attendees: int = 1
+    preferred_time: str | None = None
+
+class OpenHouseRSVPResponse(BaseModel):
+    id: int
+    listing_id: int
+    name: str
+    email: str
+    attendees: int
+    message: str
+    created_at: datetime
+
+
+# --- Neighborhood & Community Schemas ---
+
+class NeighborhoodStat(BaseModel):
+    name: str
+    title: str
+    tagline: str
+    safety: str
+    walkScore: str
+    avgPrice: str
+    medianHome: str
+    activeListingsCount: int
+    highlights: list[str]
+    image: str
+
+class SchoolItem(BaseModel):
+    name: str
+    district: str
+    rating: str
+    level: str
+    students: str
+    ratio: str
+    city: str
+    address: str
+    nearbyListingsCount: int
+
+
+# --- Commute / Drive-Time Schemas ---
+
+class CommuteListingItem(BaseModel):
+    id: int
+    address: str
+    city: str
+    price: float
+    price_formatted: str
+    beds: int | None = None
+    baths: float | None = None
+    sqft: int | None = None
+    estimated_minutes: int
+    image_url: str
+
+class CommuteRadiusGroup(BaseModel):
+    radius_label: str
+    color_badge: str
+    region_title: str
+    description: str
+    city: str
+    average_minutes: int
+    listings: list[CommuteListingItem] = []
+
+class CommuteSearchResponse(BaseModel):
+    origin: str
+    max_minutes: int
+    mode: str
+    groups: list[CommuteRadiusGroup] = []
+

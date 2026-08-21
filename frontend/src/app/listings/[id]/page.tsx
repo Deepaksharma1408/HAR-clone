@@ -78,10 +78,11 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   const [leadSuccess, setLeadSuccess] = useState(false);
   const [leadError, setLeadError] = useState<string | null>(null);
 
-  // Pre-Approval Modal & Amortization Schedule state
+  // Pre-Approval Modal & Amortization Schedule & Lightbox state
   const [showPreApprovalModal, setShowPreApprovalModal] = useState(false);
   const [preApprovalSubmitted, setPreApprovalSubmitted] = useState(false);
   const [showAmortizationTable, setShowAmortizationTable] = useState(false);
+  const [showLightbox, setShowLightbox] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -270,77 +271,218 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
         </div>
 
         {/* Photo Gallery Grid with Crossfade Transitions */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-96">
-          {/* Main Large Photo */}
-          <div className="md:col-span-2 h-full overflow-hidden rounded-xl bg-bg relative">
-            <AnimatePresence mode="wait">
-              {listing.images && listing.images.length > 0 ? (
-                <motion.img
-                  key={activePhotoIndex}
-                  src={getImageUrl(listing.images[activePhotoIndex % listing.images.length].image_url)}
-                  alt={`${listing.address} photo ${activePhotoIndex + 1}`}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <motion.div
-                  key={activePhotoIndex}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="w-full h-full"
+        <section className="relative isolate z-0 w-full mb-8 space-y-3">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[360px] sm:h-[420px] md:h-[480px] rounded-2xl overflow-hidden">
+            {/* Main Large Photo */}
+            <div className="md:col-span-2 h-full overflow-hidden rounded-2xl bg-bg relative group">
+              <AnimatePresence mode="wait">
+                {listing.images && listing.images.length > 0 ? (
+                  <motion.img
+                    key={activePhotoIndex}
+                    src={getImageUrl(listing.images[activePhotoIndex % listing.images.length].image_url)}
+                    alt={`${listing.address} photo ${activePhotoIndex + 1}`}
+                    initial={{ opacity: 0, scale: 0.98 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full h-full object-cover object-center cursor-pointer"
+                    onClick={() => setShowLightbox(true)}
+                  />
+                ) : (
+                  <motion.div
+                    key={activePhotoIndex}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="w-full h-full"
+                  >
+                    <HouseSVGPlaceholder hue={galleryHues[activePhotoIndex % 3]} className="h-full" />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Prev / Next Overlay Arrows on Main Photo */}
+              {listing.images && listing.images.length > 1 && (
+                <>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActivePhotoIndex((prev) => (prev - 1 + listing.images.length) % listing.images.length);
+                    }}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-brass text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs shadow-md font-bold text-lg"
+                    aria-label="Previous Photo"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActivePhotoIndex((prev) => (prev + 1) % listing.images.length);
+                    }}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/50 hover:bg-brass text-white flex items-center justify-center transition-all cursor-pointer backdrop-blur-xs shadow-md font-bold text-lg"
+                    aria-label="Next Photo"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+
+              {/* Expand Fullscreen Button & Photo Counter */}
+              <div className="absolute bottom-3 left-3 flex items-center gap-2">
+                <button
+                  onClick={() => setShowLightbox(true)}
+                  className="bg-black/60 hover:bg-black/80 backdrop-blur-xs text-white text-xs font-medium px-3 py-1.5 rounded-full flex items-center gap-1.5 transition-colors cursor-pointer"
                 >
-                  <HouseSVGPlaceholder hue={galleryHues[activePhotoIndex % 3]} className="h-full" />
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-xs text-white text-xs font-medium px-2.5 py-1 rounded-full">
-              Photo {(activePhotoIndex % Math.max(1, listing.images?.length || 3)) + 1} of {Math.max(1, listing.images?.length || 3)}
+                  <span>⛶</span>
+                  <span>View Full Photo</span>
+                </button>
+              </div>
+
+              <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-xs text-white text-xs font-medium px-3 py-1.5 rounded-full pointer-events-none">
+                Photo {(activePhotoIndex % Math.max(1, listing.images?.length || 3)) + 1} of {Math.max(1, listing.images?.length || 3)}
+              </div>
             </div>
+
+            {/* Dynamic Side Photo Grid - Displays the OTHER available images and swaps on click */}
+            {(() => {
+              const totalImgs = listing.images?.length || 0;
+              const slot1Index = totalImgs > 1 ? (activePhotoIndex + 1) % totalImgs : 0;
+              const slot2Index = totalImgs > 2 ? (activePhotoIndex + 2) % totalImgs : slot1Index;
+
+              return (
+                <div className="grid grid-rows-2 gap-4 h-full">
+                  {/* Side Slot 1 */}
+                  <div
+                    onClick={() => totalImgs > 1 && setActivePhotoIndex(slot1Index)}
+                    className="h-full overflow-hidden rounded-2xl bg-bg relative cursor-pointer group transition-all duration-300 border border-line hover:border-brass shadow-xs hover:shadow-md"
+                    title="Click to view this photo in main display"
+                  >
+                    {listing.images && listing.images.length > slot1Index ? (
+                      <img
+                        src={getImageUrl(listing.images[slot1Index].image_url)}
+                        alt={`${listing.address} photo ${slot1Index + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <HouseSVGPlaceholder hue={galleryHues[1]} className="h-full" />
+                    )}
+                    <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium px-2 py-0.5 rounded-md">
+                      Photo {slot1Index + 1}
+                    </div>
+                  </div>
+
+                  {/* Side Slot 2 */}
+                  <div
+                    onClick={() => totalImgs > 2 && setActivePhotoIndex(slot2Index)}
+                    className="h-full overflow-hidden rounded-2xl bg-bg relative cursor-pointer group transition-all duration-300 border border-line hover:border-brass shadow-xs hover:shadow-md"
+                    title="Click to view this photo in main display"
+                  >
+                    {listing.images && listing.images.length > slot2Index ? (
+                      <img
+                        src={getImageUrl(listing.images[slot2Index].image_url)}
+                        alt={`${listing.address} photo ${slot2Index + 1}`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                      />
+                    ) : (
+                      <HouseSVGPlaceholder hue={galleryHues[2]} className="h-full" />
+                    )}
+                    <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-xs text-white text-[11px] font-medium px-2 py-0.5 rounded-md">
+                      Photo {slot2Index + 1}
+                    </div>
+                  </div>
+                </div>
+              );
+            })()}
           </div>
-          {/* Side Photo Grid */}
-          <div className="grid grid-rows-2 gap-4 h-full">
-            <div
-              onClick={() => setActivePhotoIndex(1)}
-              className={`h-full overflow-hidden rounded-xl bg-bg relative cursor-pointer transition-all duration-200 ${
-                activePhotoIndex === 1 ? "ring-2 ring-brass" : "hover:opacity-90"
-              }`}
-            >
-              {listing.images && listing.images.length > 1 ? (
-                <img
-                  src={getImageUrl(listing.images[1].image_url)}
-                  alt={listing.address}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <HouseSVGPlaceholder hue={galleryHues[1]} className="h-full" />
-              )}
+
+          {/* Bottom Thumbnail Strip for Instant Selection of ALL Photos */}
+          {listing.images && listing.images.length > 1 && (
+            <div className="flex items-center gap-3 overflow-x-auto py-2 scrollbar-none">
+              {listing.images.map((img, idx) => {
+                const isSelected = (activePhotoIndex % listing.images.length) === idx;
+                return (
+                  <button
+                    key={img.id || idx}
+                    onClick={() => setActivePhotoIndex(idx)}
+                    className={`flex-shrink-0 w-24 h-16 sm:w-28 sm:h-18 rounded-xl overflow-hidden relative cursor-pointer transition-all duration-200 border-2 ${
+                      isSelected
+                        ? "border-brass ring-2 ring-brass/40 scale-105 shadow-md"
+                        : "border-line opacity-70 hover:opacity-100 hover:border-brass"
+                    }`}
+                  >
+                    <img
+                      src={getImageUrl(img.image_url)}
+                      alt={`Thumbnail ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <span className="absolute bottom-1 right-1 bg-black/70 text-white text-[9px] font-mono px-1 rounded">
+                      {idx + 1}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <div
-              onClick={() => setActivePhotoIndex(2)}
-              className={`h-full overflow-hidden rounded-xl bg-bg relative cursor-pointer transition-all duration-200 ${
-                activePhotoIndex === 2 ? "ring-2 ring-brass" : "hover:opacity-90"
-              }`}
+          )}
+        </section>
+
+        {/* Fullscreen Lightbox Modal */}
+        <AnimatePresence>
+          {showLightbox && listing.images && listing.images.length > 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8"
+              onClick={() => setShowLightbox(false)}
             >
-              {listing.images && listing.images.length > 2 ? (
+              <button
+                onClick={() => setShowLightbox(false)}
+                className="absolute top-6 right-6 text-white text-3xl font-bold hover:text-brass p-2 cursor-pointer z-10"
+                aria-label="Close Fullscreen"
+              >
+                ✕
+              </button>
+
+              <div
+                className="relative max-w-5xl max-h-[85vh] w-full flex items-center justify-center"
+                onClick={(e) => e.stopPropagation()}
+              >
                 <img
-                  src={getImageUrl(listing.images[2].image_url)}
-                  alt={listing.address}
-                  className="w-full h-full object-cover"
+                  src={getImageUrl(listing.images[activePhotoIndex % listing.images.length].image_url)}
+                  alt={`${listing.address} full photo`}
+                  className="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
                 />
-              ) : (
-                <HouseSVGPlaceholder hue={galleryHues[2]} className="h-full" />
-              )}
-            </div>
-          </div>
-        </div>
+
+                {listing.images.length > 1 && (
+                  <>
+                    <button
+                      onClick={() => setActivePhotoIndex((prev) => (prev - 1 + listing.images.length) % listing.images.length)}
+                      className="absolute left-2 sm:-left-12 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 hover:bg-brass text-white flex items-center justify-center text-2xl font-bold cursor-pointer transition-all"
+                      aria-label="Previous"
+                    >
+                      ‹
+                    </button>
+                    <button
+                      onClick={() => setActivePhotoIndex((prev) => (prev + 1) % listing.images.length)}
+                      className="absolute right-2 sm:-right-12 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 hover:bg-brass text-white flex items-center justify-center text-2xl font-bold cursor-pointer transition-all"
+                      aria-label="Next"
+                    >
+                      ›
+                    </button>
+                  </>
+                )}
+              </div>
+
+              <span className="text-white/80 text-sm font-mono mt-4">
+                Photo {(activePhotoIndex % listing.images.length) + 1} of {listing.images.length} · {listing.address}
+              </span>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Spec Grid & Content Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
+        <div className="relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 lg:gap-10 items-start pt-4 border-t border-line">
           {/* Main Property Overview */}
           <div className="lg:col-span-2 space-y-10">
             {/* Specs Bar */}
@@ -687,9 +829,20 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                 <Link key={sim.id} href={`/listings/${sim.id}`}>
                   <Card className="h-full flex flex-col justify-between group">
                     <div>
-                      <div className="h-44 w-full relative mb-3">
-                        <HouseSVGPlaceholder hue={sim.hue_color || "var(--sage-soft)"} />
-                        <div className="absolute top-3 left-3">
+                      <div className="h-44 w-full relative mb-3 overflow-hidden rounded-xl bg-bg">
+                        {sim.images && sim.images.length > 0 ? (
+                          <img
+                            src={getImageUrl(sim.images[0].image_url)}
+                            alt={sim.address}
+                            onError={(e) => {
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
+                            }}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <HouseSVGPlaceholder index={sim.id} hue={sim.hue_color || "var(--sage-soft)"} />
+                        )}
+                        <div className="absolute top-3 left-3 z-10">
                           <Badge variant={sim.type === "For Rent" ? "sage" : "brass"}>
                             {sim.type}
                           </Badge>

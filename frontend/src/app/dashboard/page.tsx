@@ -341,10 +341,13 @@ export default function AgentDashboardPage() {
                         <img
                           src={getImageUrl(item.images[0].image_url)}
                           alt={item.address}
+                          onError={(e) => {
+                            e.currentTarget.src = "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80";
+                          }}
                           className="w-full h-full object-cover"
                         />
                       ) : (
-                        <HouseSVGPlaceholder hue={item.hue_color || "var(--sage-soft)"} />
+                        <HouseSVGPlaceholder index={item.id} hue={item.hue_color || "var(--sage-soft)"} />
                       )}
                       <div className="absolute top-3 left-3 flex gap-2 z-10">
                         <Badge variant={item.type === "For Rent" ? "sage" : "brass"}>

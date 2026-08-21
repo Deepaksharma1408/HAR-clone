@@ -1,63 +1,66 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
+import { getApiUrl } from "@/lib/config";
+
+interface NeighborhoodData {
+  name: string;
+  title: string;
+  tagline: string;
+  safety: string;
+  walkScore: string;
+  avgPrice: string;
+  medianHome: string;
+  activeListingsCount: number;
+  highlights: string[];
+  image: string;
+}
 
 export default function NeighborhoodsPage() {
+  const [neighborhoods, setNeighborhoods] = useState<NeighborhoodData[]>([]);
   const [selectedCity, setSelectedCity] = useState("Memorial");
+  const [loading, setLoading] = useState(true);
 
-  const neighborhoods = [
-    {
-      name: "Memorial",
-      title: "Piney Point & Memorial Villages",
-      tagline: "Serene Wooded Estates & Elite School Districts",
-      safety: "96 / 100",
-      walkScore: "78 / 100",
-      avgPrice: "$345 / sqft",
-      medianHome: "$1,850,000",
-      highlights: ["Spring Branch ISD Schools", "Memorial City Mall & Medical Center", "Terry Hershey Park Trails"],
-      image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      name: "Katy",
-      title: "Cinco Ranch & Greater Katy",
-      tagline: "Master-Planned Communities & Top Family Living",
-      safety: "94 / 100",
-      walkScore: "72 / 100",
-      avgPrice: "$225 / sqft",
-      medianHome: "$585,000",
-      highlights: ["Katy ISD 10/10 Schools", "LaCenterra Outdoor Town Center", "Water Parks & Lakes"],
-      image: "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      name: "The Heights",
-      title: "Historic Houston Heights",
-      tagline: "Walkable Historic Charm, Boutiques & Artisan Dining",
-      safety: "91 / 100",
-      walkScore: "92 / 100",
-      avgPrice: "$360 / sqft",
-      medianHome: "$890,000",
-      highlights: ["19th Street Shopping District", "Heights Hike & Bike Trail", "Craft Breweries & Bistros"],
-      image: "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      name: "Sugar Land",
-      title: "First Colony & Telfair",
-      tagline: "Lakeside Ranches & Vibrant Town Center",
-      safety: "95 / 100",
-      walkScore: "75 / 100",
-      avgPrice: "$210 / sqft",
-      medianHome: "$540,000",
-      highlights: ["Fort Bend ISD Schools", "Smart Financial Centre Arena", "Sugar Land Town Square"],
-      image: "https://images.unsplash.com/photo-1613977257363-707ba9348227?auto=format&fit=crop&w=800&q=80",
-    },
-  ];
+  useEffect(() => {
+    const fetchNeighborhoods = async () => {
+      setLoading(true);
+      try {
+        const apiUrl = getApiUrl();
+        const res = await fetch(`${apiUrl}/neighborhoods`);
+        if (res.ok) {
+          const data: NeighborhoodData[] = await res.json();
+          setNeighborhoods(data);
+          if (data.length > 0) {
+            setSelectedCity(data[0].name);
+          }
+        }
+      } catch (err) {
+        console.error("Failed to load neighborhoods", err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const currentHood = neighborhoods.find((n) => n.name === selectedCity) || neighborhoods[0];
+    fetchNeighborhoods();
+  }, []);
+
+  const currentHood = neighborhoods.find((n) => n.name === selectedCity) || neighborhoods[0] || {
+    name: "Memorial",
+    title: "Piney Point & Memorial Villages",
+    tagline: "Serene Wooded Estates & Elite School Districts",
+    safety: "96 / 100",
+    walkScore: "78 / 100",
+    avgPrice: "$345 / sqft",
+    medianHome: "$1,850,000",
+    activeListingsCount: 8,
+    highlights: ["Spring Branch ISD Schools", "Memorial City Mall & Medical Center", "Terry Hershey Park Trails"],
+    image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
+  };
 
   return (
     <div className="min-h-screen bg-bg text-ink font-inter">
@@ -70,7 +73,7 @@ export default function NeighborhoodsPage() {
               Texas Neighborhood Explorer<span className="text-brass">.</span>
             </h1>
             <p className="text-sm text-ink-soft mt-3 leading-relaxed">
-              Discover top Texas communities. Compare neighborhood safety scores, walkability ratings, median home prices, school ratings, and local amenities.
+              Discover top Texas communities. Compare neighborhood safety scores, walkability ratings, median home prices, school ratings, and local amenities powered by live MLS database statistics.
             </p>
           </div>
 
@@ -82,11 +85,11 @@ export default function NeighborhoodsPage() {
                 onClick={() => setSelectedCity(n.name)}
                 className={`px-5 py-2.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
                   selectedCity === n.name
-                    ? "bg-brass text-white shadow-xs"
+                    ? "bg-brass text-white shadow-xs font-bold"
                     : "bg-bg text-ink border border-line hover:border-ink"
                 }`}
               >
-                {n.name}
+                {n.name} ({n.activeListingsCount} Homes)
               </button>
             ))}
           </div>
@@ -97,52 +100,81 @@ export default function NeighborhoodsPage() {
           <div className="lg:col-span-2 space-y-6">
             <div>
               <span className="inline-block px-3 py-1 bg-indigo-100 text-indigo-900 text-xs font-medium rounded-full mb-2">
-                Featured District
+                Featured District · {currentHood.activeListingsCount} Live Listings
               </span>
               <h2 className="font-fraunces text-3xl font-bold text-ink">{currentHood.title}</h2>
-              <p className="text-xs text-brass font-medium font-inter mt-1">{currentHood.tagline}</p>
+              <p className="text-sm text-ink-soft mt-1.5">{currentHood.tagline}</p>
             </div>
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 bg-bg p-4 rounded-xl border border-line text-center">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-4 border-y border-line text-xs">
               <div>
-                <div className="text-xs font-medium text-ink-soft">Safety Score</div>
-                <div className="font-inter font-bold text-lg text-emerald-600">{currentHood.safety}</div>
+                <span className="text-ink-soft block">Safety Score</span>
+                <span className="font-bold text-emerald-700 text-sm">{currentHood.safety}</span>
               </div>
               <div>
-                <div className="text-xs font-medium text-ink-soft">Walk Score</div>
-                <div className="font-inter font-bold text-lg text-amber-600">{currentHood.walkScore}</div>
+                <span className="text-ink-soft block">Walk Score</span>
+                <span className="font-bold text-blue-700 text-sm">{currentHood.walkScore}</span>
               </div>
               <div>
-                <div className="text-xs font-medium text-ink-soft">Avg Price/sqft</div>
-                <div className="font-inter font-bold text-lg text-ink">{currentHood.avgPrice}</div>
+                <span className="text-ink-soft block">Avg. Price / SqFt</span>
+                <span className="font-bold text-ink text-sm">{currentHood.avgPrice}</span>
               </div>
               <div>
-                <div className="text-xs font-medium text-ink-soft">Median Home</div>
-                <div className="font-inter font-bold text-lg text-brass">{currentHood.medianHome}</div>
+                <span className="text-ink-soft block">Median Home Price</span>
+                <span className="font-bold text-brass text-sm">{currentHood.medianHome}</span>
               </div>
             </div>
 
             <div className="space-y-2">
-              <span className="text-xs font-medium text-ink-soft">Community Highlights:</span>
-              <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-inter text-ink">
+              <span className="text-xs font-semibold text-ink uppercase tracking-wider">Neighborhood Highlights</span>
+              <div className="flex flex-wrap gap-2">
                 {currentHood.highlights.map((h, i) => (
-                  <li key={i} className="flex items-center gap-2 bg-bg px-3 py-2 rounded-lg border border-line/60">
-                    <span className="text-brass">✓</span> {h}
-                  </li>
+                  <span key={i} className="px-3 py-1 bg-bg border border-line rounded-lg text-xs text-ink-soft">
+                    ✨ {h}
+                  </span>
                 ))}
-              </ul>
+              </div>
             </div>
 
             <div className="pt-2">
               <Link href={`/listings?city=${encodeURIComponent(currentHood.name)}`}>
-                <Button size="lg">Explore {currentHood.name} Homes for Sale →</Button>
+                <Button variant="brass" size="md">
+                  Browse All {currentHood.name} Homes ({currentHood.activeListingsCount}) →
+                </Button>
               </Link>
             </div>
           </div>
 
-          <div className="h-full min-h-[260px] rounded-xl overflow-hidden shadow-inner border border-line">
-            <img src={currentHood.image} alt={currentHood.name} className="w-full h-full object-cover" />
+          <div className="h-72 w-full rounded-xl overflow-hidden border border-line shadow-inner">
+            <img src={currentHood.image} alt={currentHood.title} className="w-full h-full object-cover" />
           </div>
+        </div>
+
+        {/* All Neighborhoods Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {neighborhoods.map((hood) => (
+            <Card key={hood.name} className="bg-surface p-6 rounded-2xl border border-line flex flex-col justify-between space-y-4 hover:shadow-lg transition-shadow">
+              <div className="space-y-3">
+                <div className="h-36 w-full rounded-xl overflow-hidden mb-3">
+                  <img src={hood.image} alt={hood.title} className="w-full h-full object-cover" />
+                </div>
+                <div className="flex justify-between items-center">
+                  <h3 className="font-fraunces text-xl font-bold text-ink">{hood.name}</h3>
+                  <Badge variant="brass">{hood.activeListingsCount} Active</Badge>
+                </div>
+                <p className="text-xs text-ink-soft line-clamp-2">{hood.tagline}</p>
+                <div className="text-xs text-ink-soft font-semibold">
+                  Median: <span className="text-brass">{hood.medianHome}</span> · {hood.avgPrice}
+                </div>
+              </div>
+
+              <Link href={`/listings?city=${encodeURIComponent(hood.name)}`} className="w-full">
+                <Button variant="outline" size="sm" className="w-full">
+                  Explore {hood.name} Properties →
+                </Button>
+              </Link>
+            </Card>
+          ))}
         </div>
       </main>
     </div>

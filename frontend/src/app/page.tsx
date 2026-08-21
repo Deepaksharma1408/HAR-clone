@@ -643,11 +643,11 @@ export default function HomePage() {
         <div className="estateline-container space-y-12">
           
           {/* 1. Quick Tool Shortcuts Horizontal Carousel */}
-          <div className="relative group">
+          <div className="flex items-center gap-2 sm:gap-4 w-full">
             {/* Left Scroll Button */}
             <button
               onClick={() => scrollShortcuts("left")}
-              className="absolute -left-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-surface border border-line text-ink flex items-center justify-center shadow-md hover:bg-brass hover:text-white transition-colors cursor-pointer"
+              className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface border border-line text-ink flex items-center justify-center shadow-sm hover:shadow-md hover:bg-brass hover:text-white hover:border-brass transition-all cursor-pointer font-bold text-lg"
               aria-label="Scroll Left"
             >
               ‹
@@ -656,21 +656,21 @@ export default function HomePage() {
             {/* Carousel Scroll Track */}
             <div
               ref={shortcutRef}
-              className="flex items-center gap-4 overflow-x-auto scrollbar-none py-2 px-2 scroll-smooth"
+              className="flex-1 flex items-center gap-3 sm:gap-4 overflow-x-auto scrollbar-none py-2 px-1 scroll-smooth snap-x"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {harToolShortcuts.map((tool, idx) => (
                 <Link
                   key={idx}
                   href={tool.link}
-                  className="flex-shrink-0 w-28 sm:w-32 bg-surface border border-line rounded-xl p-3 text-center hover:shadow-lg hover:border-brass transition-all duration-300 group/card cursor-pointer"
+                  className="snap-start flex-shrink-0 w-[110px] sm:w-[124px] min-h-[105px] bg-surface border border-line rounded-xl p-2.5 sm:p-3 text-center hover:shadow-lg hover:border-brass transition-all duration-300 group/card cursor-pointer flex flex-col items-center justify-between"
                 >
                   <div
-                    className={`w-10 h-10 mx-auto mb-2 rounded-full ${tool.bg} text-white flex items-center justify-center text-lg shadow-xs group-hover/card:scale-110 transition-transform`}
+                    className={`w-10 h-10 mx-auto mb-1.5 rounded-full ${tool.bg} text-white flex items-center justify-center text-lg shadow-xs group-hover/card:scale-110 transition-transform`}
                   >
                     {tool.svg}
                   </div>
-                  <span className="block text-xs font-medium text-ink group-hover/card:text-brass transition-colors leading-tight">
+                  <span className="block text-[11px] sm:text-xs font-medium text-ink group-hover/card:text-brass transition-colors leading-tight line-clamp-2">
                     {tool.label}
                   </span>
                 </Link>
@@ -680,7 +680,7 @@ export default function HomePage() {
             {/* Right Scroll Button */}
             <button
               onClick={() => scrollShortcuts("right")}
-              className="absolute -right-4 top-1/2 -translate-y-1/2 z-20 w-9 h-9 rounded-full bg-surface border border-line text-ink flex items-center justify-center shadow-md hover:bg-brass hover:text-white transition-colors cursor-pointer"
+              className="flex-shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface border border-line text-ink flex items-center justify-center shadow-sm hover:shadow-md hover:bg-brass hover:text-white hover:border-brass transition-all cursor-pointer font-bold text-lg"
               aria-label="Scroll Right"
             >
               ›

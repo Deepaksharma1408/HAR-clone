@@ -73,6 +73,27 @@ def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
         )
     return user
 
+# Optional user dependency (returns None instead of throwing 401 for guests)
+def get_optional_user(request: Request, db: Session = Depends(get_db)):
+    token = request.cookies.get(COOKIE_NAME)
+    
+    if not token:
+        auth_header = request.headers.get("Authorization")
+        if auth_header and auth_header.startswith("Bearer "):
+            token = auth_header.split(" ")[1]
+
+    if not token:
+        return None
+
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        email: str = payload.get("sub")
+        if not email:
+            return None
+        return db.query(User).filter(User.email == email).first()
+    except Exception:
+        return None
+
 # Dependency to get current agent
 def get_current_agent(current_user: User = Depends(get_current_user)) -> User:
     if current_user.role != "agent":

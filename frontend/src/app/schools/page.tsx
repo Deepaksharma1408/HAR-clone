@@ -1,64 +1,54 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
+import { getApiUrl } from "@/lib/config";
+
+interface SchoolItem {
+  name: string;
+  district: string;
+  rating: string;
+  level: string;
+  students: string;
+  ratio: string;
+  city: string;
+  address: string;
+  nearbyListingsCount: number;
+}
 
 export default function SchoolsPage() {
-  const [district, setDistrict] = useState("katy");
+  const [district, setDistrict] = useState("all");
   const [levelFilter, setLevelFilter] = useState("all");
+  const [schools, setSchools] = useState<SchoolItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const schools = [
-    {
-      name: "Seven Lakes High School",
-      district: "Katy ISD",
-      rating: "10/10",
-      level: "High",
-      students: "3,200",
-      ratio: "16:1",
-      city: "Katy",
-      address: "9251 S Fry Rd, Katy, TX",
-    },
-    {
-      name: "Memorial High School",
-      district: "Spring Branch ISD",
-      rating: "10/10",
-      level: "High",
-      students: "2,600",
-      ratio: "15:1",
-      city: "Memorial",
-      address: "935 Echo Ln, Houston, TX",
-    },
-    {
-      name: "Beckendorff Junior High",
-      district: "Katy ISD",
-      rating: "9/10",
-      level: "Middle",
-      students: "1,450",
-      ratio: "14:1",
-      city: "Katy",
-      address: "8200 S Fry Rd, Katy, TX",
-    },
-    {
-      name: "Frostwood Elementary School",
-      district: "Spring Branch ISD",
-      rating: "10/10",
-      level: "Elementary",
-      students: "720",
-      ratio: "13:1",
-      city: "Memorial",
-      address: "12214 Memorial Dr, Houston, TX",
-    },
-  ];
+  useEffect(() => {
+    const fetchSchools = async () => {
+      setLoading(true);
+      try {
+        const apiUrl = getApiUrl();
+        const params = new URLSearchParams();
+        if (district !== "all") params.append("district", district);
+        if (levelFilter !== "all") params.append("level", levelFilter);
 
-  const filteredSchools = schools.filter(
-    (s) =>
-      (district === "all" || s.district.toLowerCase().includes(district)) &&
-      (levelFilter === "all" || s.level === levelFilter)
-  );
+        const res = await fetch(`${apiUrl}/schools?${params.toString()}`);
+        if (res.ok) {
+          const data: SchoolItem[] = await res.json();
+          setSchools(data);
+        }
+      } catch (err) {
+        console.error("Failed to load schools", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSchools();
+  }, [district, levelFilter]);
 
   return (
     <div className="min-h-screen bg-bg text-ink font-inter">
@@ -89,7 +79,7 @@ export default function SchoolsPage() {
                   key={d.id}
                   onClick={() => setDistrict(d.id)}
                   className={`px-3.5 py-1.5 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                    district === d.id ? "bg-brass text-white shadow-xs" : "bg-surface text-ink border border-line hover:border-ink"
+                    district === d.id ? "bg-brass text-white shadow-xs font-bold" : "bg-surface text-ink border border-line hover:border-ink"
                   }`}
                 >
                   {d.label}
@@ -98,64 +88,74 @@ export default function SchoolsPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="text-xs font-medium text-ink-soft mr-1">Level:</span>
-              {["all", "Elementary", "Middle", "High"].map((lvl) => (
-                <button
-                  key={lvl}
-                  onClick={() => setLevelFilter(lvl)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition-all cursor-pointer ${
-                    levelFilter === lvl ? "bg-ink text-white" : "bg-surface text-ink-soft hover:text-ink"
-                  }`}
-                >
-                  {lvl === "all" ? "All Levels" : lvl}
-                </button>
-              ))}
+              <span className="text-xs font-medium text-ink-soft">Grade Level:</span>
+              <select
+                value={levelFilter}
+                onChange={(e) => setLevelFilter(e.target.value)}
+                className="px-3 py-1.5 bg-surface border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass cursor-pointer"
+              >
+                <option value="all">All Levels</option>
+                <option value="Elementary">Elementary</option>
+                <option value="Middle">Middle School</option>
+                <option value="High">High School</option>
+              </select>
             </div>
           </div>
         </div>
 
-        {/* School Directory Cards Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {filteredSchools.map((s, idx) => (
-            <Card key={idx} className="bg-surface p-6 rounded-2xl border border-line flex flex-col justify-between hover:shadow-lg transition-shadow">
-              <div>
-                <div className="flex items-start justify-between mb-3">
+        {/* Schools List Cards */}
+        {loading ? (
+          <div className="py-20 text-center text-ink-soft">
+            <div className="inline-block w-8 h-8 border-2 border-brass border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-xs">Fetching school ratings and nearby homes...</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {schools.map((s, idx) => (
+              <Card key={idx} className="bg-surface p-6 rounded-2xl border border-line space-y-4 shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start">
                   <div>
-                    <span className="text-xs font-medium text-brass">{s.district}</span>
-                    <h3 className="font-fraunces text-xl font-bold text-ink mt-0.5">{s.name}</h3>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-brass">
+                      {s.district} · {s.level} School
+                    </span>
+                    <h3 className="font-fraunces text-xl font-bold text-ink mt-1">{s.name}</h3>
+                    <p className="text-xs text-ink-soft mt-0.5">{s.address}</p>
                   </div>
-                  <div className="bg-emerald-100 text-emerald-900 border border-emerald-300 font-semibold text-xs px-3 py-1 rounded-full">
-                    {s.rating}
+                  <div className="flex flex-col items-center justify-center w-14 h-14 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 shrink-0">
+                    <span className="font-fraunces font-bold text-lg leading-none">{s.rating}</span>
+                    <span className="text-[9px] font-medium uppercase tracking-tight mt-0.5">Rating</span>
                   </div>
                 </div>
 
-                <p className="text-xs text-ink-soft mb-4">{s.address}</p>
-
-                <div className="grid grid-cols-3 gap-2 bg-bg p-3.5 rounded-xl text-center border border-line text-xs font-inter">
+                <div className="grid grid-cols-3 gap-2 py-3 border-y border-line text-center text-xs">
                   <div>
-                    <div className="text-xs font-medium text-ink-soft">Grade Level</div>
-                    <div className="font-semibold text-ink mt-0.5">{s.level}</div>
+                    <span className="text-ink-soft text-[11px] block">Students</span>
+                    <span className="font-semibold text-ink">{s.students}</span>
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-ink-soft">Students</div>
-                    <div className="font-semibold text-ink mt-0.5">{s.students}</div>
+                    <span className="text-ink-soft text-[11px] block">Student/Teacher</span>
+                    <span className="font-semibold text-ink">{s.ratio}</span>
                   </div>
                   <div>
-                    <div className="text-xs font-medium text-ink-soft">Student-Teacher</div>
-                    <div className="font-semibold text-ink mt-0.5">{s.ratio}</div>
+                    <span className="text-ink-soft text-[11px] block">Available Homes</span>
+                    <span className="font-semibold text-brass font-bold">{s.nearbyListingsCount} in {s.city}</span>
                   </div>
                 </div>
-              </div>
 
-              <div className="mt-6 pt-4 border-t border-line flex items-center justify-between">
-                <span className="text-xs text-ink-soft font-inter">Homes in Boundary: <strong className="text-ink">12 Active Listings</strong></span>
-                <Link href={`/listings?city=${encodeURIComponent(s.city)}`}>
-                  <Button variant="outline" size="sm">View Homes in District →</Button>
-                </Link>
-              </div>
-            </Card>
-          ))}
-        </div>
+                <div className="flex justify-between items-center pt-1">
+                  <span className="text-xs text-ink-soft">
+                    Serving <strong className="text-ink">{s.city}</strong> attendance zone
+                  </span>
+                  <Link href={`/listings?city=${encodeURIComponent(s.city)}`}>
+                    <Button variant="outline" size="sm">
+                      View {s.nearbyListingsCount} Nearby Homes →
+                    </Button>
+                  </Link>
+                </div>
+              </Card>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );

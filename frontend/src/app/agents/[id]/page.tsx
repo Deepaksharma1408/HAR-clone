@@ -21,6 +21,17 @@ interface ListingItem {
   baths: number | null;
   sqft: number | null;
   hue_color: string | null;
+  images?: { id: number; image_url: string }[];
+}
+
+function getImageUrl(url: string | null | undefined): string {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) return url;
+  if (url.startsWith("/uploads/")) {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+    return `${apiUrl}${url}`;
+  }
+  return url;
 }
 
 interface AgentDetail {
@@ -162,8 +173,19 @@ export default function AgentProfilePage({ params }: { params: Promise<{ id: str
                   <Card className="h-full flex flex-col justify-between group">
                     <div>
                       <div className="h-44 w-full relative mb-3 overflow-hidden rounded-xl bg-bg">
-                        <HouseSVGPlaceholder hue={item.hue_color || "var(--sage-soft)"} />
-                        <div className="absolute top-3 left-3">
+                        {item.images && item.images.length > 0 ? (
+                          <img
+                            src={getImageUrl(item.images[0].image_url)}
+                            alt={item.address}
+                            onError={(e) => {
+                              e.currentTarget.src = "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80";
+                            }}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                          />
+                        ) : (
+                          <HouseSVGPlaceholder index={item.id} hue={item.hue_color || "var(--sage-soft)"} />
+                        )}
+                        <div className="absolute top-3 left-3 z-10">
                           <Badge variant={item.type === "For Rent" ? "sage" : "brass"}>
                             {item.type}
                           </Badge>

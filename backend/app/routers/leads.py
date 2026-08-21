@@ -3,8 +3,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from ..database import get_db
-from ..models import User, Lead, Listing
-from ..schemas import LeadCreate, LeadResponse, LeadMineResponse
+from ..models import User, Lead, Listing, SellerLead
+from ..schemas import LeadCreate, LeadResponse, LeadMineResponse, SellerLeadCreate, SellerLeadResponse
 from ..email import send_email
 from .auth import get_current_agent
 
@@ -117,3 +117,61 @@ def get_my_leads(
         )
 
     return mine_leads
+
+
+# POST /leads/seller - Submit seller listing / valuation consultation request
+@mine_router.post("/seller", response_model=SellerLeadResponse, status_code=status.HTTP_201_CREATED)
+def submit_seller_lead(
+    lead_data: SellerLeadCreate,
+    db: Session = Depends(get_db)
+):
+    seller_lead = SellerLead(
+        name=lead_data.name,
+        email=lead_data.email,
+        phone=lead_data.phone,
+        address=lead_data.address,
+        city=lead_data.city,
+        beds=lead_data.beds,
+        baths=lead_data.baths,
+        sqft=lead_data.sqft,
+        property_condition=lead_data.property_condition,
+        timeline=lead_data.timeline,
+        notes=lead_data.notes,
+        status="new"
+    )
+    db.add(seller_lead)
+    db.commit()
+    db.refresh(seller_lead)
+
+    # Email notification to listing advisory team
+    subject = f"New Seller Valuation Request: {seller_lead.address}, {seller_lead.city}"
+    email_body = f"""Estateline Listing Advisory Team,
+
+A homeowner has submitted a request for a custom CMA listing strategy:
+
+Owner Details:
+- Name: {seller_lead.name}
+- Email: {seller_lead.email}
+- Phone: {seller_lead.phone or 'Not Provided'}
+
+Property Details:
+- Address: {seller_lead.address}, {seller_lead.city}
+- Specs: {seller_lead.beds} Beds · {seller_lead.baths} Baths · {seller_lead.sqft or 'N/A'} Sq Ft
+- Condition: {seller_lead.property_condition}
+- Timeline: {seller_lead.timeline}
+
+Please prepare the CMA and contact the seller within 2 hours.
+"""
+    send_email(to_email="advisors@estateline.com", subject=subject, body=email_body)
+
+    return seller_lead
+
+
+# GET /leads/seller - Retrieve seller leads for agents
+@mine_router.get("/seller", response_model=List[SellerLeadResponse])
+def get_seller_leads(
+    current_user: User = Depends(get_current_agent),
+    db: Session = Depends(get_db)
+):
+    return db.query(SellerLead).order_by(SellerLead.created_at.desc()).all()
+
