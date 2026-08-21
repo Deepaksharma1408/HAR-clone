@@ -42,7 +42,7 @@ export default function HomeValuePage() {
   const [baths, setBaths] = useState("3.5");
   const [sqft, setSqft] = useState("3200");
   const [condition, setCondition] = useState("Good");
-  
+
   const [data, setData] = useState<ValuationData | null>(null);
   const [isCalculating, setIsCalculating] = useState(false);
   const [error, setError] = useState<string | null>(null);

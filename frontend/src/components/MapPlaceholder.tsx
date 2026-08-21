@@ -51,22 +51,19 @@ export const MapPlaceholder: React.FC<MapPlaceholderProps> = ({
       {/* Real Live Map Embed Background */}
       <iframe
         title={`Map of ${mapQuery}`}
-        className="absolute inset-0 w-full h-full border-0 opacity-80"
+        className="absolute inset-0 w-full h-full border-0 opacity-85"
         loading="lazy"
         allowFullScreen
-        src={
-          googleApiKey
-            ? `https://www.google.com/maps/embed/v1/place?key=${googleApiKey}&q=${encodeURIComponent(mapQuery)}&zoom=14`
-            : `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`
-        }
+        src={`https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
       />
 
       {/* Header Info Bar */}
       <div className="z-10 flex items-center justify-between pointer-events-none">
-        <span className="text-[10px] font-mono uppercase tracking-wider text-ink-soft bg-surface/90 px-3 py-1 rounded-full border border-line/60 shadow-xs font-bold">
-          📍 {googleApiKey ? "Google Maps Activated" : `Live Map · ${city}, TX`}
+        <span className="text-[11px] font-inter uppercase tracking-wider text-ink bg-surface/95 px-3 py-1.5 rounded-full border border-line/80 shadow-xs font-bold flex items-center gap-1.5">
+          <span>📍</span>
+          <span>Live Interactive Map · {city || "Texas"}</span>
         </span>
-        <span className="text-[10px] font-mono text-brass font-bold bg-surface/90 px-2.5 py-1 rounded-full border border-line/60">
+        <span className="text-[11px] font-mono text-brass font-bold bg-surface/95 px-3 py-1.5 rounded-full border border-line/80 shadow-xs">
           MLS Geographical Grid
         </span>
       </div>
@@ -80,11 +77,10 @@ export const MapPlaceholder: React.FC<MapPlaceholderProps> = ({
         >
           <button
             onClick={() => setActivePin(pin.id)}
-            className={`px-3 py-1.5 rounded-full font-fraunces font-bold text-xs shadow-lg transition-all duration-300 cursor-pointer border ${
-              activePin === pin.id
+            className={`px-3 py-1.5 rounded-full font-fraunces font-bold text-xs shadow-lg transition-all duration-300 cursor-pointer border ${activePin === pin.id
                 ? "bg-brass text-white border-white scale-110 ring-4 ring-brass/30"
                 : "bg-ink text-white border-line hover:bg-brass hover:scale-105"
-            }`}
+              }`}
           >
             {pin.label}
           </button>

@@ -50,14 +50,12 @@ export default function AgentsPage() {
 
         {/* ── FEATURED 4 AGENTS ── */}
         <section>
-          <div className="mb-10 border-b border-line pb-4 text-center max-w-2xl mx-auto">
+          <div className="mb-10 border-b border-line pb-6 text-center max-w-3xl mx-auto px-4 sm:px-6">
             <EyebrowLabel>Top Advisors</EyebrowLabel>
-            <TextMaskReveal>
-              <h1 className="font-fraunces text-4xl font-semibold text-ink mt-1">
-                <span className="text-mask-inner inline-block">Agent Directory</span><span className="text-brass">.</span>
-              </h1>
-            </TextMaskReveal>
-            <p className="text-xs text-ink-soft mt-2">
+            <h1 className="font-fraunces text-3xl sm:text-4xl font-semibold text-ink mt-2 tracking-tight">
+              <span>Agent Directory</span><span className="text-brass">.</span>
+            </h1>
+            <p className="text-xs sm:text-sm text-ink-soft mt-3 max-w-xl mx-auto leading-relaxed">
               Work with elite architectural specialists representing premier properties across Katy, Memorial, Sugar Land, and The Heights.
             </p>
           </div>

@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { gsap } from "@/lib/motion/gsap";
 import { useAuth } from "@/context/AuthContext";
@@ -15,6 +15,7 @@ import { MagneticButton } from "./MagneticButton";
 
 export const Header: React.FC = () => {
   const router = useRouter();
+  const pathname = usePathname() || "";
   const { user, logout } = useAuth();
   const { favoriteCount } = useFavorites();
   const shouldReduceMotion = useReducedMotion();
@@ -30,16 +31,34 @@ export const Header: React.FC = () => {
   const [showMortgageModal, setShowMortgageModal] = useState(false);
   const [showHomeValuationModal, setShowHomeValuationModal] = useState(false);
 
+  // Active Route Checks
+  const isBuyRentActive = pathname === "/listings" || pathname.startsWith("/listings");
+  const isHomeValuesActive = pathname === "/home-value";
+  const isExploreActive = [
+    "/neighborhoods",
+    "/open-houses",
+    "/schools",
+    "/drive-time",
+    "/new-homes",
+    "/price-drops",
+    "/high-rise",
+    "/just-listed",
+    "/foreclosures",
+  ].some((route) => pathname === route || pathname.startsWith(route));
+  const isAgentsActive = pathname.startsWith("/agents");
+  const isMortgageActive = showMortgageModal;
+  const isMoreActive = ["/compare", "/sell", "/account/alerts", "/account/favorites", "/dashboard"].includes(pathname);
+
   const [mounted, setMounted] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
 
   // Mortgage Calculator State
-  const [mortgagePrice, setMortgagePrice] = useState(1250000);
-  const [mortgageDownPercent, setMortgageDownPercent] = useState(20);
-  const [mortgageInterestRate, setMortgageInterestRate] = useState(6.5);
-  const [mortgageTermYears, setMortgageTermYears] = useState(30);
+  const [mortgagePriceStr, setMortgagePriceStr] = useState("1250000");
+  const [mortgageDownPercentStr, setMortgageDownPercentStr] = useState("20");
+  const [mortgageInterestRateStr, setMortgageInterestRateStr] = useState("6.5");
+  const [mortgageTermYearsStr, setMortgageTermYearsStr] = useState("30");
 
   // Home Valuation State
   const [valuationAddress, setValuationAddress] = useState("");
@@ -83,23 +102,43 @@ export const Header: React.FC = () => {
     }
   };
 
+  const parseNum = (val: string, fallback: number = 0) => {
+    const cleaned = val.replace(/[^0-9.]/g, "");
+    const parsed = parseFloat(cleaned);
+    return isNaN(parsed) ? fallback : parsed;
+  };
+
   // Calculate Mortgage Monthly Payment
   const calculateMortgage = () => {
-    const principal = mortgagePrice * (1 - mortgageDownPercent / 100);
-    const monthlyRate = mortgageInterestRate / 100 / 12;
-    const totalPayments = mortgageTermYears * 12;
+    const price = parseNum(mortgagePriceStr, 0);
+    const downPct = parseNum(mortgageDownPercentStr, 0);
+    const ratePct = parseNum(mortgageInterestRateStr, 0);
+    const termYrs = parseNum(mortgageTermYearsStr, 0);
+
+    const downAmount = Math.round(price * (downPct / 100));
+    const principal = Math.max(0, price - downAmount);
+    const monthlyRate = ratePct > 0 ? (ratePct / 100) / 12 : 0;
+    const totalPayments = termYrs * 12;
+
     let monthlyPI = 0;
-    if (monthlyRate === 0 || totalPayments === 0) {
-      monthlyPI = principal / (totalPayments || 1);
-    } else {
-      monthlyPI =
-        (principal * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments))) /
-        (Math.pow(1 + monthlyRate, totalPayments) - 1);
+    if (principal > 0 && totalPayments > 0) {
+      if (monthlyRate === 0) {
+        monthlyPI = principal / totalPayments;
+      } else {
+        monthlyPI =
+          (principal * (monthlyRate * Math.pow(1 + monthlyRate, totalPayments))) /
+          (Math.pow(1 + monthlyRate, totalPayments) - 1);
+      }
     }
 
-    const monthlyTax = (mortgagePrice * 0.022) / 12;
-    const monthlyIns = (mortgagePrice * 0.005) / 12;
+    const monthlyTax = price > 0 ? (price * 0.022) / 12 : 0;
+    const monthlyIns = price > 0 ? (price * 0.005) / 12 : 0;
+
     return {
+      price,
+      downPct,
+      downAmount,
+      loanPrincipal: principal,
       monthlyPI: Math.round(monthlyPI || 0),
       monthlyTax: Math.round(monthlyTax || 0),
       monthlyIns: Math.round(monthlyIns || 0),
@@ -151,15 +190,21 @@ export const Header: React.FC = () => {
         </Link>
 
         {/* 2. HAR-Style Central Navigation Links */}
+        {/* 2. HAR-Style Central Navigation Links */}
         <nav className="hidden md:flex items-center gap-8 font-inter font-semibold text-[15px] text-ink">
           {/* Buy/Rent Dropdown */}
           <div className="relative" onMouseEnter={() => setBuyRentOpen(true)} onMouseLeave={() => setBuyRentOpen(false)}>
             <button
               onClick={() => setBuyRentOpen(!buyRentOpen)}
-              className="flex items-center gap-1.5 hover:text-brass transition-colors py-2 font-semibold cursor-pointer"
+              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${
+                isBuyRentActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+              }`}
             >
               <span>Buy/Rent</span>
               <span className="text-[11px] opacity-70">▾</span>
+              {isBuyRentActive && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brass rounded-full" />
+              )}
             </button>
 
             <AnimatePresence>
@@ -174,7 +219,9 @@ export const Header: React.FC = () => {
                 >
                   <Link
                     href="/listings"
-                    className="block px-4 py-2.5 hover:bg-bg hover:text-brass text-ink font-medium text-sm transition-colors"
+                    className={`block px-4 py-2.5 hover:bg-bg hover:text-brass font-medium text-sm transition-colors ${
+                      pathname === "/listings" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setBuyRentOpen(false)}
                   >
                     All Properties
@@ -229,19 +276,29 @@ export const Header: React.FC = () => {
           {/* Home Values Link */}
           <Link
             href="/home-value"
-            className="hover:text-brass transition-colors font-semibold py-2 cursor-pointer"
+            className={`transition-colors font-semibold py-2 cursor-pointer relative ${
+              isHomeValuesActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+            }`}
           >
             Home Values
+            {isHomeValuesActive && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brass rounded-full" />
+            )}
           </Link>
 
           {/* Explore Sub-markets Dropdown */}
           <div className="relative" onMouseEnter={() => setExploreOpen(true)} onMouseLeave={() => setExploreOpen(false)}>
             <button
               onClick={() => setExploreOpen(!exploreOpen)}
-              className="flex items-center gap-1.5 hover:text-brass transition-colors py-2 font-semibold cursor-pointer"
+              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${
+                isExploreActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+              }`}
             >
               <span>Explore</span>
               <span className="text-[11px] opacity-70">▾</span>
+              {isExploreActive && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brass rounded-full" />
+              )}
             </button>
 
             <AnimatePresence>
@@ -288,26 +345,44 @@ export const Header: React.FC = () => {
           </div>
 
           {/* Agents Directory Link */}
-          <Link href="/agents" className="hover:text-brass transition-colors font-semibold py-2">
+          <Link
+            href="/agents"
+            className={`transition-colors font-semibold py-2 relative ${
+              isAgentsActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+            }`}
+          >
             Agents
+            {isAgentsActive && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brass rounded-full" />
+            )}
           </Link>
 
           {/* Mortgage Calculator Modal Launcher */}
           <button
             onClick={() => setShowMortgageModal(true)}
-            className="hover:text-brass transition-colors font-semibold py-2 cursor-pointer"
+            className={`transition-colors font-semibold py-2 cursor-pointer relative ${
+              isMortgageActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+            }`}
           >
             Mortgage
+            {isMortgageActive && (
+              <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brass rounded-full" />
+            )}
           </button>
 
           {/* More... Dropdown */}
           <div className="relative" onMouseEnter={() => setMoreOpen(true)} onMouseLeave={() => setMoreOpen(false)}>
             <button
               onClick={() => setMoreOpen(!moreOpen)}
-              className="flex items-center gap-1.5 hover:text-brass transition-colors py-2 font-semibold cursor-pointer"
+              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${
+                isMoreActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+              }`}
             >
               <span>More...</span>
               <span className="text-[11px] opacity-70">▾</span>
+              {isMoreActive && (
+                <span className="absolute bottom-0 left-0 right-0 h-[2.5px] bg-brass rounded-full" />
+              )}
             </button>
 
             <AnimatePresence>
@@ -322,42 +397,54 @@ export const Header: React.FC = () => {
                 >
                   <Link
                     href="/open-houses"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🗓️ Weekend Open Houses
                   </Link>
                   <Link
                     href="/sell"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/sell" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🏷️ Sell &amp; List Your Home
                   </Link>
                   <Link
                     href="/neighborhoods"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🏘️ Neighborhood Explorer
                   </Link>
                   <Link
                     href="/schools"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/schools" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🎓 Texas School Finder
                   </Link>
                   <Link
                     href="/drive-time"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     ⏱️ Commute &amp; Drive-Time Search
                   </Link>
                   <Link
                     href="/compare"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/compare" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     ⚖️ Side-by-Side Property Comparison
@@ -365,14 +452,18 @@ export const Header: React.FC = () => {
                   <div className="border-t border-line my-1"></div>
                   <Link
                     href="/account/alerts"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/account/alerts" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🔔 Saved Search Alerts
                   </Link>
                   <Link
                     href="/account/favorites"
-                    className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors"
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                      pathname === "/account/favorites" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                    }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     ♥ Saved Favorites ({favoriteCount})
@@ -380,7 +471,9 @@ export const Header: React.FC = () => {
                   {user?.role === "agent" && (
                     <Link
                       href="/dashboard"
-                      className="block px-4 py-2 hover:bg-bg hover:text-brass text-ink font-medium text-xs transition-colors font-bold text-brass"
+                      className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
+                        pathname === "/dashboard" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                       onClick={() => setMoreOpen(false)}
                     >
                       🏛 Agent Control Panel
@@ -398,15 +491,17 @@ export const Header: React.FC = () => {
           {/* Heart Favorites Count Badge - hidden on mobile, shown md+ */}
           <Link
             href="/account/favorites"
-            className="relative p-1.5 text-ink hover:text-danger transition-colors hidden md:flex items-center gap-1.5 hover:bg-bg rounded-full"
+            className="relative p-2 text-ink hover:text-danger transition-colors hidden md:flex items-center justify-center hover:bg-bg rounded-full cursor-pointer"
             title="Saved Favorites"
           >
             <svg className="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
             </svg>
-            <span className="px-1.5 py-0.2 bg-brass text-white text-[11px] font-inter rounded-full min-w-[20px] text-center font-bold">
-              {favoriteCount}
-            </span>
+            {favoriteCount > 0 && (
+              <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-brass text-white text-[10px] font-inter rounded-full min-w-[18px] text-center font-bold shadow-xs leading-none">
+                {favoriteCount}
+              </span>
+            )}
           </Link>
 
           {/* Sign In Dropdown - hidden on mobile, shown md+ */}
@@ -568,41 +663,101 @@ export const Header: React.FC = () => {
 
               <div className="space-y-2 border-b border-line pb-4">
                 <span className="text-xs font-semibold text-brass block">Properties & Search</span>
-                <Link href="/listings" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/listings"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/listings" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   All Properties
                 </Link>
-                <Link href="/listings?type=For+Sale" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-ink-soft hover:text-ink">
+                <Link
+                  href="/listings?type=For+Sale"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-1.5 text-ink-soft hover:text-ink px-1"
+                >
                   Homes For Sale
                 </Link>
-                <Link href="/listings?type=For+Rent" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-ink-soft hover:text-ink">
+                <Link
+                  href="/listings?type=For+Rent"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-1.5 text-ink-soft hover:text-ink px-1"
+                >
                   Homes For Rent
                 </Link>
-                <Link href="/listings?type=Luxury+Villa" onClick={() => setMobileMenuOpen(false)} className="block py-1.5 text-ink-soft hover:text-ink">
+                <Link
+                  href="/listings?type=Luxury+Villa"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="block py-1.5 text-ink-soft hover:text-ink px-1"
+                >
                   Luxury Villas & Penthouses
                 </Link>
               </div>
 
               <div className="space-y-2 border-b border-line pb-4">
                 <span className="text-xs font-semibold text-brass block">Real Estate Tools &amp; Discovery</span>
-                <Link href="/open-houses" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/open-houses"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   🗓️ Weekend Open Houses
                 </Link>
-                <Link href="/sell" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/sell"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/sell" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   🏷️ Sell &amp; List Your Home
                 </Link>
-                <Link href="/home-value" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/home-value"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/home-value" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   📈 Home Valuation Estimator
                 </Link>
-                <Link href="/neighborhoods" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/neighborhoods"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   🏘️ Neighborhood Explorer
                 </Link>
-                <Link href="/schools" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/schools"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/schools" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   🎓 Texas School Finder
                 </Link>
-                <Link href="/drive-time" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/drive-time"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   ⏱️ Commute &amp; Drive-Time Search
                 </Link>
-                <Link href="/compare" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/compare"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname === "/compare" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   📊 Side-by-Side Property Comparison
                 </Link>
                 <button
@@ -610,11 +765,17 @@ export const Header: React.FC = () => {
                     setMobileMenuOpen(false);
                     setShowMortgageModal(true);
                   }}
-                  className="block w-full text-left py-1 font-medium text-ink hover:text-brass cursor-pointer"
+                  className="block w-full text-left py-1.5 font-medium text-ink hover:text-brass cursor-pointer px-1"
                 >
                   🧮 30-Year Mortgage Calculator
                 </button>
-                <Link href="/agents" onClick={() => setMobileMenuOpen(false)} className="block py-1 font-medium text-ink hover:text-brass">
+                <Link
+                  href="/agents"
+                  onClick={() => setMobileMenuOpen(false)}
+                  className={`block py-1.5 font-medium transition-colors ${
+                    pathname.startsWith("/agents") ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                  }`}
+                >
                   🏛 Real Estate Agents Directory
                 </Link>
               </div>
@@ -695,35 +856,92 @@ export const Header: React.FC = () => {
                       </h2>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <Input
-                        label="Home Purchase Price ($)"
-                        type="number"
-                        value={mortgagePrice}
-                        onChange={(e) => setMortgagePrice(parseFloat(e.target.value) || 0)}
-                      />
-                      <Input
-                        label="Down Payment (%)"
-                        type="number"
-                        value={mortgageDownPercent}
-                        onChange={(e) => setMortgageDownPercent(parseFloat(e.target.value) || 0)}
-                      />
-                      <Input
-                        label="Interest Rate (%)"
-                        type="number"
-                        step="0.1"
-                        value={mortgageInterestRate}
-                        onChange={(e) => setMortgageInterestRate(parseFloat(e.target.value) || 0)}
-                      />
-                      <Input
-                        label="Loan Term (Years)"
-                        type="number"
-                        value={mortgageTermYears}
-                        onChange={(e) => setMortgageTermYears(parseFloat(e.target.value) || 30)}
-                      />
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-mono uppercase text-ink-soft">Custom Financial Parameters</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMortgagePriceStr("");
+                          setMortgageDownPercentStr("");
+                          setMortgageInterestRateStr("");
+                          setMortgageTermYearsStr("");
+                        }}
+                        className="text-xs text-danger hover:underline cursor-pointer font-medium"
+                      >
+                        Clear All ✕
+                      </button>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="text-xs font-semibold text-ink-soft block mb-1">
+                          Home Purchase Price ($)
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={mortgagePriceStr}
+                          onChange={(e) => setMortgagePriceStr(e.target.value.replace(/[^0-9]/g, ""))}
+                          placeholder="e.g. 1250000"
+                          className="w-full bg-bg text-ink px-3 py-2.5 rounded-lg border border-line focus:outline-none focus:border-brass text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-ink-soft block mb-1">
+                          Down Payment (%)
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={mortgageDownPercentStr}
+                          onChange={(e) => setMortgageDownPercentStr(e.target.value.replace(/[^0-9.]/g, ""))}
+                          placeholder="e.g. 20"
+                          className="w-full bg-bg text-ink px-3 py-2.5 rounded-lg border border-line focus:outline-none focus:border-brass text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-ink-soft block mb-1">
+                          Interest Rate (%)
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="decimal"
+                          value={mortgageInterestRateStr}
+                          onChange={(e) => setMortgageInterestRateStr(e.target.value.replace(/[^0-9.]/g, ""))}
+                          placeholder="e.g. 6.5"
+                          className="w-full bg-bg text-ink px-3 py-2.5 rounded-lg border border-line focus:outline-none focus:border-brass text-sm"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="text-xs font-semibold text-ink-soft block mb-1">
+                          Loan Term (Years)
+                        </label>
+                        <input
+                          type="text"
+                          inputMode="numeric"
+                          value={mortgageTermYearsStr}
+                          onChange={(e) => setMortgageTermYearsStr(e.target.value.replace(/[^0-9]/g, ""))}
+                          placeholder="e.g. 30"
+                          className="w-full bg-bg text-ink px-3 py-2.5 rounded-lg border border-line focus:outline-none focus:border-brass text-sm"
+                        />
+                      </div>
                     </div>
 
                     <div className="bg-bg p-5 rounded-xl border border-line space-y-3 font-inter">
+                      <div className="flex justify-between text-xs text-ink-soft">
+                        <span>Loan Principal:</span>
+                        <span className="text-ink font-semibold">
+                          ${mortgageCalcs.loanPrincipal.toLocaleString()}
+                          {mortgageCalcs.downAmount > 0 && (
+                            <span className="text-[10px] text-ink-soft ml-1">
+                              (Down: ${mortgageCalcs.downAmount.toLocaleString()})
+                            </span>
+                          )}
+                        </span>
+                      </div>
                       <div className="flex justify-between text-xs text-ink-soft">
                         <span>Principal &amp; Interest:</span>
                         <span className="text-ink font-semibold">${mortgageCalcs.monthlyPI.toLocaleString()}/mo</span>
@@ -733,7 +951,7 @@ export const Header: React.FC = () => {
                         <span className="text-ink font-semibold">${mortgageCalcs.monthlyTax.toLocaleString()}/mo</span>
                       </div>
                       <div className="flex justify-between text-xs text-ink-soft">
-                        <span>Est. Home Insurance:</span>
+                        <span>Est. Home Insurance (0.5%):</span>
                         <span className="text-ink font-semibold">${mortgageCalcs.monthlyIns.toLocaleString()}/mo</span>
                       </div>
                       <div className="pt-3 border-t border-line flex justify-between items-center text-sm">
@@ -745,7 +963,7 @@ export const Header: React.FC = () => {
                     </div>
 
                     <Button variant="brass" className="w-full py-2.5" onClick={() => setShowMortgageModal(false)}>
-                      Close Calculator
+                      Close
                     </Button>
                   </Card>
                 </motion.div>

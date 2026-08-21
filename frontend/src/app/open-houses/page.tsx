@@ -11,7 +11,8 @@ import { StaggerGrid, StaggerItem } from "@/components/StaggerGrid";
 import { MagneticButton } from "@/components/MagneticButton";
 import { ImageCurtainReveal } from "@/components/motion/ImageCurtainReveal";
 import { TextMaskReveal } from "@/components/motion/TextMaskReveal";
-import { getApiUrl } from "@/lib/config";
+import { getApiUrl, getImageUrl } from "@/lib/config";
+import { DEFAULT_ESTATE_IMAGES } from "@/components/HouseSVGPlaceholder";
 
 interface OpenHouseItem {
   id: number;
@@ -163,7 +164,14 @@ export default function OpenHousesPage() {
                 <Card className="bg-surface p-0 rounded-2xl overflow-hidden border border-line flex flex-col justify-between hover:shadow-xl transition-shadow h-full">
                   <div>
                     <ImageCurtainReveal direction="up" className="h-48 w-full relative">
-                      <img src={item.image_url} alt={item.address} className="w-full h-full object-cover" />
+                      <img
+                        src={getImageUrl(item.image_url)}
+                        alt={item.address}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.currentTarget.src = DEFAULT_ESTATE_IMAGES[item.id % DEFAULT_ESTATE_IMAGES.length];
+                        }}
+                      />
                       <div className="absolute top-3 left-3">
                         <Badge variant="brass">Open House</Badge>
                       </div>

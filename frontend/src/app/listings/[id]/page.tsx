@@ -211,61 +211,61 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
     <div className="flex flex-col min-h-screen bg-bg">
       <main className="flex-1 estateline-container py-10 space-y-10">
         {/* Header Title & Pricing Bar */}
-        <div className="border-b border-line pb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <Badge variant={listing.type === "For Rent" ? "sage" : "brass"}>
-                {listing.type}
-              </Badge>
-              <Badge variant="default">{listing.status}</Badge>
-              <span className="text-xs font-mono uppercase text-ink-soft">— {listing.city}</span>
-            </div>
-            <TextMaskReveal>
-              <h1 className="font-fraunces text-3xl md:text-4xl font-semibold text-ink">
-                <span className="text-mask-inner inline-block">{listing.address}</span>
+        <div className="border-b border-line pb-6 space-y-4">
+          <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+            <div className="min-w-0">
+              <div className="flex items-center gap-2 mb-2">
+                <Badge variant={listing.type === "For Rent" ? "sage" : "brass"}>
+                  {listing.type}
+                </Badge>
+                <Badge variant="default">{listing.status}</Badge>
+                <span className="text-xs font-mono uppercase text-ink-soft">— {listing.city}</span>
+              </div>
+              <h1 className="font-fraunces text-3xl sm:text-4xl font-semibold text-ink break-words">
+                {listing.address}
               </h1>
-            </TextMaskReveal>
-            <p className="text-xs font-mono text-ink-soft mt-1">
-              ID #{listing.id} · Listed in {listing.city}, Texas
-            </p>
-          </div>
-
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="text-left md:text-right">
-              <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-soft">
-                Asking Price
-              </span>
-              <span className="font-fraunces font-bold text-3xl md:text-4xl text-brass">
-                {formatPrice(listing.price, listing.type)}
-              </span>
+              <p className="text-xs font-mono text-ink-soft mt-1">
+                ID #{listing.id} · Listed in {listing.city}, Texas
+              </p>
             </div>
 
-            {/* Action Bar: PDF Datasheet, Compare, Pre-Approval */}
-            <div className="flex flex-wrap items-center gap-2">
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2 bg-surface hover:bg-bg border border-line rounded-lg text-xs font-medium text-ink flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
-                title="Download / Print PDF Flyer"
-              >
-                <span>📄</span>
-                <span>Print PDF Flyer</span>
-              </button>
+            <div className="flex flex-wrap items-center lg:justify-end gap-4 sm:gap-6 flex-shrink-0">
+              <div>
+                <span className="block text-[10px] font-mono uppercase tracking-wider text-ink-soft">
+                  Asking Price
+                </span>
+                <span className="font-fraunces font-bold text-3xl sm:text-4xl text-brass whitespace-nowrap">
+                  {formatPrice(listing.price, listing.type)}
+                </span>
+              </div>
 
-              <Link href="/compare">
-                <button className="px-4 py-2 bg-surface hover:bg-bg border border-line rounded-lg text-xs font-medium text-ink flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs">
-                  <span>📊</span>
-                  <span>Compare</span>
-                </button>
-              </Link>
-
-              <MagneticButton>
+              {/* Action Bar: PDF Datasheet, Compare, Pre-Approval */}
+              <div className="flex flex-wrap items-center gap-2 print:hidden">
                 <button
-                  onClick={() => setShowPreApprovalModal(true)}
-                  className="px-4 py-2 bg-brass hover:bg-brass-deep text-white rounded-lg text-xs font-medium transition-colors cursor-pointer shadow-xs"
+                  onClick={() => window.print()}
+                  className="px-3.5 py-2 bg-surface hover:bg-bg border border-line rounded-lg text-xs font-medium text-ink flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs whitespace-nowrap"
+                  title="Download / Print PDF Flyer"
                 >
-                  Apply Pre-Approval →
+                  <span>📄</span>
+                  <span>Print PDF Flyer</span>
                 </button>
-              </MagneticButton>
+
+                <Link href="/compare">
+                  <button className="px-3.5 py-2 bg-surface hover:bg-bg border border-line rounded-lg text-xs font-medium text-ink flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs whitespace-nowrap">
+                    <span>📊</span>
+                    <span>Compare</span>
+                  </button>
+                </Link>
+
+                <MagneticButton>
+                  <button
+                    onClick={() => setShowPreApprovalModal(true)}
+                    className="px-4 py-2 bg-brass hover:bg-brass-deep text-white rounded-lg text-xs font-medium transition-colors cursor-pointer shadow-xs whitespace-nowrap"
+                  >
+                    Apply Pre-Approval →
+                  </button>
+                </MagneticButton>
+              </div>
             </div>
           </div>
         </div>
@@ -398,7 +398,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
 
           {/* Bottom Thumbnail Strip for Instant Selection of ALL Photos */}
           {listing.images && listing.images.length > 1 && (
-            <div className="flex items-center gap-3 overflow-x-auto py-2 scrollbar-none">
+            <div className="flex items-center gap-3 overflow-x-auto py-2 scrollbar-none print:hidden">
               {listing.images.map((img, idx) => {
                 const isSelected = (activePhotoIndex % listing.images.length) === idx;
                 return (
@@ -578,7 +578,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
             </div>
 
             {/* Map Placeholder */}
-            <div className="space-y-4">
+            <div className="space-y-4 print:hidden">
               <EyebrowLabel>Geographic Location</EyebrowLabel>
               <h2 className="font-fraunces text-2xl font-semibold text-ink">
                 Location & Context
@@ -741,7 +741,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
             )}
 
             {/* Contact Agent Form */}
-            <Card hoverable={false} className="bg-surface">
+            <Card hoverable={false} className="bg-surface print:hidden">
               <h3 className="font-fraunces text-lg font-semibold text-ink mb-1">
                 Inquire About Property
               </h3>
@@ -811,7 +811,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
 
         {/* Similar Listings Row */}
         {similarListings.length > 0 && (
-          <div className="pt-12 border-t border-line space-y-6">
+          <div className="pt-12 border-t border-line space-y-6 print:hidden">
             <div className="flex items-end justify-between">
               <div>
                 <EyebrowLabel>Complementary Options</EyebrowLabel>

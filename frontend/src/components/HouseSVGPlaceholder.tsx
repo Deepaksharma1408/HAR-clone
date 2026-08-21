@@ -7,7 +7,7 @@ export interface HouseSVGPlaceholderProps {
   alt?: string;
 }
 
-const DEFAULT_ESTATE_IMAGES = [
+export const DEFAULT_ESTATE_IMAGES = [
   "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=1200&q=80",
   "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80",
   "https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80",
