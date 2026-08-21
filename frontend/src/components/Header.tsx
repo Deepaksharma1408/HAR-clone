@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
@@ -28,6 +29,11 @@ export const Header: React.FC = () => {
   // Interactive Modal States
   const [showMortgageModal, setShowMortgageModal] = useState(false);
   const [showHomeValuationModal, setShowHomeValuationModal] = useState(false);
+
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Mortgage Calculator State
   const [mortgagePrice, setMortgagePrice] = useState(1250000);
@@ -220,13 +226,13 @@ export const Header: React.FC = () => {
             </AnimatePresence>
           </div>
 
-          {/* Home Values Modal Launcher */}
-          <button
-            onClick={() => setShowHomeValuationModal(true)}
+          {/* Home Values Link */}
+          <Link
+            href="/home-value"
             className="hover:text-brass transition-colors font-semibold py-2 cursor-pointer"
           >
             Home Values
-          </button>
+          </Link>
 
           {/* Explore Sub-markets Dropdown */}
           <div className="relative" onMouseEnter={() => setExploreOpen(true)} onMouseLeave={() => setExploreOpen(false)}>
@@ -581,188 +587,193 @@ export const Header: React.FC = () => {
         )}
       </AnimatePresence>
 
-      {/* ------------------- INTERACTIVE MODALS ------------------- */}
+      {/* ------------------- INTERACTIVE PORTAL MODALS ------------------- */}
 
-      {/* 1. MORTGAGE CALCULATOR MODAL */}
-      <AnimatePresence>
-        {showMortgageModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowMortgageModal(false)}
-              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 12 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-lg w-full relative z-10"
-            >
-              <Card hoverable={false} className="w-full bg-surface relative space-y-6 rounded-2xl shadow-2xl">
-                <button
+      {mounted && createPortal(
+        <>
+          {/* 1. MORTGAGE CALCULATOR MODAL */}
+          <AnimatePresence>
+            {showMortgageModal && (
+              <div className="fixed inset-0 z-[999999] overflow-y-auto p-4 sm:p-6 flex items-start sm:items-center justify-center pt-20 sm:pt-24 pb-12">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   onClick={() => setShowMortgageModal(false)}
-                  className="absolute top-4 right-4 text-ink-soft hover:text-ink font-bold text-xl cursor-pointer"
+                  className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 12 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="max-w-lg w-full relative z-10 my-auto shadow-2xl rounded-2xl"
                 >
-                  ✕
-                </button>
-                <div>
-                  <span className="text-xs font-semibold text-brass block mb-1">
-                    FINANCIAL ADVISORY
-                  </span>
-                  <h2 className="font-fraunces text-2xl font-bold text-ink">
-                    Mortgage & Monthly Payment Calculator<span className="text-brass">.</span>
-                  </h2>
-                </div>
+                  <Card hoverable={false} className="w-full bg-surface relative space-y-6 rounded-2xl shadow-2xl p-6 sm:p-8">
+                    <button
+                      onClick={() => setShowMortgageModal(false)}
+                      className="absolute top-4 right-4 text-ink-soft hover:text-ink font-bold text-xl cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                    <div>
+                      <span className="text-xs font-semibold text-brass block mb-1">
+                        FINANCIAL ADVISORY
+                      </span>
+                      <h2 className="font-fraunces text-2xl font-bold text-ink">
+                        Mortgage &amp; Monthly Payment Calculator<span className="text-brass">.</span>
+                      </h2>
+                    </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <Input
-                    label="Home Purchase Price ($)"
-                    type="number"
-                    value={mortgagePrice}
-                    onChange={(e) => setMortgagePrice(parseFloat(e.target.value) || 0)}
-                  />
-                  <Input
-                    label="Down Payment (%)"
-                    type="number"
-                    value={mortgageDownPercent}
-                    onChange={(e) => setMortgageDownPercent(parseFloat(e.target.value) || 0)}
-                  />
-                  <Input
-                    label="Interest Rate (%)"
-                    type="number"
-                    step="0.1"
-                    value={mortgageInterestRate}
-                    onChange={(e) => setMortgageInterestRate(parseFloat(e.target.value) || 0)}
-                  />
-                  <Input
-                    label="Loan Term (Years)"
-                    type="number"
-                    value={mortgageTermYears}
-                    onChange={(e) => setMortgageTermYears(parseFloat(e.target.value) || 30)}
-                  />
-                </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <Input
+                        label="Home Purchase Price ($)"
+                        type="number"
+                        value={mortgagePrice}
+                        onChange={(e) => setMortgagePrice(parseFloat(e.target.value) || 0)}
+                      />
+                      <Input
+                        label="Down Payment (%)"
+                        type="number"
+                        value={mortgageDownPercent}
+                        onChange={(e) => setMortgageDownPercent(parseFloat(e.target.value) || 0)}
+                      />
+                      <Input
+                        label="Interest Rate (%)"
+                        type="number"
+                        step="0.1"
+                        value={mortgageInterestRate}
+                        onChange={(e) => setMortgageInterestRate(parseFloat(e.target.value) || 0)}
+                      />
+                      <Input
+                        label="Loan Term (Years)"
+                        type="number"
+                        value={mortgageTermYears}
+                        onChange={(e) => setMortgageTermYears(parseFloat(e.target.value) || 30)}
+                      />
+                    </div>
 
-                <div className="bg-bg p-5 rounded-xl border border-line space-y-3 font-inter">
-                  <div className="flex justify-between text-xs text-ink-soft">
-                    <span>Principal & Interest:</span>
-                    <span className="text-ink font-semibold">${mortgageCalcs.monthlyPI.toLocaleString()}/mo</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-ink-soft">
-                    <span>Est. Property Tax (2.2%):</span>
-                    <span className="text-ink font-semibold">${mortgageCalcs.monthlyTax.toLocaleString()}/mo</span>
-                  </div>
-                  <div className="flex justify-between text-xs text-ink-soft">
-                    <span>Est. Home Insurance:</span>
-                    <span className="text-ink font-semibold">${mortgageCalcs.monthlyIns.toLocaleString()}/mo</span>
-                  </div>
-                  <div className="pt-3 border-t border-line flex justify-between items-center text-sm">
-                    <span className="font-semibold text-ink">Total Estimated Payment:</span>
-                    <span className="font-fraunces font-bold text-2xl text-brass">
-                      ${mortgageCalcs.totalMonthly.toLocaleString()}<span className="text-xs font-normal text-ink-soft">/mo</span>
-                    </span>
-                  </div>
-                </div>
+                    <div className="bg-bg p-5 rounded-xl border border-line space-y-3 font-inter">
+                      <div className="flex justify-between text-xs text-ink-soft">
+                        <span>Principal &amp; Interest:</span>
+                        <span className="text-ink font-semibold">${mortgageCalcs.monthlyPI.toLocaleString()}/mo</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-ink-soft">
+                        <span>Est. Property Tax (2.2%):</span>
+                        <span className="text-ink font-semibold">${mortgageCalcs.monthlyTax.toLocaleString()}/mo</span>
+                      </div>
+                      <div className="flex justify-between text-xs text-ink-soft">
+                        <span>Est. Home Insurance:</span>
+                        <span className="text-ink font-semibold">${mortgageCalcs.monthlyIns.toLocaleString()}/mo</span>
+                      </div>
+                      <div className="pt-3 border-t border-line flex justify-between items-center text-sm">
+                        <span className="font-semibold text-ink">Total Estimated Payment:</span>
+                        <span className="font-fraunces font-bold text-2xl text-brass">
+                          ${mortgageCalcs.totalMonthly.toLocaleString()}<span className="text-xs font-normal text-ink-soft">/mo</span>
+                        </span>
+                      </div>
+                    </div>
 
-                <Button variant="brass" className="w-full py-2.5" onClick={() => setShowMortgageModal(false)}>
-                  Close Calculator
-                </Button>
-              </Card>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+                    <Button variant="brass" className="w-full py-2.5" onClick={() => setShowMortgageModal(false)}>
+                      Close Calculator
+                    </Button>
+                  </Card>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
 
-      {/* 2. HOME VALUATION MODAL */}
-      <AnimatePresence>
-        {showHomeValuationModal && (
-          <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => {
-                setShowHomeValuationModal(false);
-                setValuationResult(null);
-              }}
-              className="absolute inset-0 bg-black/60 backdrop-blur-xs"
-            />
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 12 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 12 }}
-              transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-              className="max-w-lg w-full relative z-10"
-            >
-              <Card hoverable={false} className="w-full bg-surface relative space-y-6 rounded-2xl shadow-2xl">
-                <button
+          {/* 2. HOME VALUATION MODAL */}
+          <AnimatePresence>
+            {showHomeValuationModal && (
+              <div className="fixed inset-0 z-[999999] overflow-y-auto p-4 sm:p-6 flex items-start sm:items-center justify-center pt-20 sm:pt-24 pb-12">
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                   onClick={() => {
                     setShowHomeValuationModal(false);
                     setValuationResult(null);
                   }}
-                  className="absolute top-4 right-4 text-ink-soft hover:text-ink font-bold text-xl cursor-pointer"
+                  className="fixed inset-0 bg-black/60 backdrop-blur-xs"
+                />
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95, y: 12 }}
+                  animate={{ opacity: 1, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95, y: 12 }}
+                  transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                  className="max-w-lg w-full relative z-10 my-auto shadow-2xl rounded-2xl"
                 >
-                  ✕
-                </button>
-                <div>
-                  <span className="text-xs font-semibold text-brass block mb-1">
-                    INSTANT MARKET ADVISORY
-                  </span>
-                  <h2 className="font-fraunces text-2xl font-bold text-ink">
-                    Instant Property Valuation Estimator<span className="text-brass">.</span>
-                  </h2>
-                </div>
-
-                <form onSubmit={handleValuationSubmit} className="space-y-4">
-                  <Input
-                    label="Property Address"
-                    required
-                    placeholder="1204 Oak Ridge Lane, Katy, TX"
-                    value={valuationAddress}
-                    onChange={(e) => setValuationAddress(e.target.value)}
-                  />
-                  <div className="grid grid-cols-3 gap-3">
-                    <Input
-                      label="Interior Sqft"
-                      type="number"
-                      required
-                      value={valuationSqft}
-                      onChange={(e) => setValuationSqft(e.target.value)}
-                    />
-                    <Input
-                      label="Bedrooms"
-                      type="number"
-                      value={valuationBeds}
-                      onChange={(e) => setValuationBeds(e.target.value)}
-                    />
-                    <Input label="Bathrooms" type="number" defaultValue="3" />
-                  </div>
-
-                  <Button type="submit" variant="brass" className="w-full py-2.5" disabled={valuationCalculating}>
-                    {valuationCalculating ? "Calculating Valuation..." : "Get Instant Architectural Valuation →"}
-                  </Button>
-                </form>
-
-                {valuationResult && (
-                  <div className="bg-brass/10 border border-brass/30 p-5 rounded-xl space-y-2">
-                    <span className="text-xs font-semibold text-brass block">
-                      ARCHITECTURAL MARKET ESTIMATE
-                    </span>
-                    <div className="font-fraunces text-3xl font-bold text-ink">
-                      ${valuationResult.estimatedValue.toLocaleString()}
+                  <Card hoverable={false} className="w-full bg-surface relative space-y-6 rounded-2xl shadow-2xl p-6 sm:p-8">
+                    <button
+                      onClick={() => {
+                        setShowHomeValuationModal(false);
+                        setValuationResult(null);
+                      }}
+                      className="absolute top-4 right-4 text-ink-soft hover:text-ink font-bold text-xl cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                    <div>
+                      <span className="text-xs font-semibold text-brass block mb-1">
+                        INSTANT MARKET ADVISORY
+                      </span>
+                      <h2 className="font-fraunces text-2xl font-bold text-ink">
+                        Instant Property Valuation Estimator<span className="text-brass">.</span>
+                      </h2>
                     </div>
-                    <p className="text-xs text-ink-soft">
-                      Valuation Range: ${valuationResult.rangeLow.toLocaleString()} – ${valuationResult.rangeHigh.toLocaleString()} (${valuationResult.pricePerSqft}/sqft)
-                    </p>
-                  </div>
-                )}
-              </Card>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+
+                    <form onSubmit={handleValuationSubmit} className="space-y-4">
+                      <Input
+                        label="Property Address"
+                        required
+                        placeholder="1204 Oak Ridge Lane, Katy, TX"
+                        value={valuationAddress}
+                        onChange={(e) => setValuationAddress(e.target.value)}
+                      />
+                      <div className="grid grid-cols-3 gap-3">
+                        <Input
+                          label="Interior Sqft"
+                          type="number"
+                          required
+                          value={valuationSqft}
+                          onChange={(e) => setValuationSqft(e.target.value)}
+                        />
+                        <Input
+                          label="Bedrooms"
+                          type="number"
+                          value={valuationBeds}
+                          onChange={(e) => setValuationBeds(e.target.value)}
+                        />
+                        <Input label="Bathrooms" type="number" defaultValue="3" />
+                      </div>
+
+                      <Button type="submit" variant="brass" className="w-full py-2.5" disabled={valuationCalculating}>
+                        {valuationCalculating ? "Calculating Valuation..." : "Get Instant Architectural Valuation →"}
+                      </Button>
+                    </form>
+
+                    {valuationResult && (
+                      <div className="bg-brass/10 border border-brass/30 p-5 rounded-xl space-y-2">
+                        <span className="text-xs font-semibold text-brass block">
+                          ARCHITECTURAL MARKET ESTIMATE
+                        </span>
+                        <div className="font-fraunces text-3xl font-bold text-ink">
+                          ${valuationResult.estimatedValue.toLocaleString()}
+                        </div>
+                        <p className="text-xs text-ink-soft">
+                          Valuation Range: ${valuationResult.rangeLow.toLocaleString()} – ${valuationResult.rangeHigh.toLocaleString()} (${valuationResult.pricePerSqft}/sqft)
+                        </p>
+                      </div>
+                    )}
+                  </Card>
+                </motion.div>
+              </div>
+            )}
+          </AnimatePresence>
+        </>,
+        document.body
+      )}
     </header>
   );
 };

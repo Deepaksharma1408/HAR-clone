@@ -32,6 +32,11 @@ const ibmPlexMono = IBM_Plex_Mono({
 export const metadata: Metadata = {
   title: "Estateline | Premium Real Estate Portal",
   description: "Estateline is an architectural, premium portal for buying and renting properties.",
+  icons: {
+    icon: "/icon.png",
+    shortcut: "/icon.png",
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
