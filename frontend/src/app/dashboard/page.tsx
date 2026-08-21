@@ -12,9 +12,8 @@ import { Select } from "@/components/Select";
 import { Textarea } from "@/components/Textarea";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
 import { HouseSVGPlaceholder } from "@/components/HouseSVGPlaceholder";
-import { MagneticButton } from "@/components/MagneticButton";
 import { useAuth } from "@/context/AuthContext";
-import { getApiUrl, getImageUrl } from "@/lib/config";
+import { getApiUrl, getImageUrl, getAuthHeaders } from "@/lib/config";
 
 interface ListingItem {
   id: number;
@@ -87,8 +86,10 @@ export default function AgentDashboardPage() {
     setLoading(true);
     try {
       const apiUrl = getApiUrl();
+      const authHeaders = getAuthHeaders();
       // Fetch my listings
       const listingsRes = await fetch(`${apiUrl}/listings/mine`, {
+        headers: { ...authHeaders },
         credentials: "include",
       });
       if (listingsRes.ok) {
@@ -98,6 +99,7 @@ export default function AgentDashboardPage() {
 
       // Fetch my leads
       const leadsRes = await fetch(`${apiUrl}/leads/mine`, {
+        headers: { ...authHeaders },
         credentials: "include",
       });
       if (leadsRes.ok) {
@@ -176,6 +178,7 @@ export default function AgentDashboardPage() {
 
     try {
       const apiUrl = getApiUrl();
+      const authHeaders = getAuthHeaders();
       let listingId = editingListingId;
       let res;
 
@@ -183,7 +186,7 @@ export default function AgentDashboardPage() {
         // PUT update
         res = await fetch(`${apiUrl}/listings/${editingListingId}`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...authHeaders },
           body: JSON.stringify(payload),
           credentials: "include",
         });
@@ -191,7 +194,7 @@ export default function AgentDashboardPage() {
         // POST create
         res = await fetch(`${apiUrl}/listings`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", ...authHeaders },
           body: JSON.stringify(payload),
           credentials: "include",
         });
@@ -215,6 +218,7 @@ export default function AgentDashboardPage() {
         }
         await fetch(`${apiUrl}/listings/${listingId}/images`, {
           method: "POST",
+          headers: { ...authHeaders },
           body: formData,
           credentials: "include",
         });
@@ -235,9 +239,10 @@ export default function AgentDashboardPage() {
     const newStatus = item.status === "active" ? "unpublished" : "active";
     try {
       const apiUrl = getApiUrl();
+      const authHeaders = getAuthHeaders();
       const res = await fetch(`${apiUrl}/listings/${item.id}`, {
         method: "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json", ...authHeaders },
         body: JSON.stringify({ status: newStatus }),
         credentials: "include",
       });
@@ -253,8 +258,10 @@ export default function AgentDashboardPage() {
     if (!window.confirm("Are you sure you want to delete this listing permanently?")) return;
     try {
       const apiUrl = getApiUrl();
+      const authHeaders = getAuthHeaders();
       const res = await fetch(`${apiUrl}/listings/${id}`, {
         method: "DELETE",
+        headers: { ...authHeaders },
         credentials: "include",
       });
       if (res.ok) {

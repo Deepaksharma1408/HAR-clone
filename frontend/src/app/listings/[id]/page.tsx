@@ -84,6 +84,9 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   const [showAmortizationTable, setShowAmortizationTable] = useState(false);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }
     const fetchData = async () => {
       setLoading(true);
       try {

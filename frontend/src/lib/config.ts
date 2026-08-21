@@ -11,4 +11,13 @@ export const getImageUrl = (url?: string | null): string => {
   }
   const apiUrl = getApiUrl();
   return `${apiUrl}${url.startsWith("/") ? "" : "/"}${url}`;
+};export const getAuthHeaders = (): Record<string, string> => {
+  const headers: Record<string, string> = {};
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("estateline_token");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+  }
+  return headers;
 };

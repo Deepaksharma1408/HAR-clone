@@ -331,6 +331,18 @@ export default function HomePage() {
   const [agents, setAgents] = useState<AgentItem[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Newsletter Subscription State
+  const [newsletterEmail, setNewsletterEmail] = useState("");
+  const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
+
+  const handleNewsletterSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (newsletterEmail.trim()) {
+      setNewsletterSubscribed(true);
+      setNewsletterEmail("");
+    }
+  };
+
   // Philosophy Carousel State
   const [currentSlide, setCurrentSlide] = useState(0);
   const carouselSlides = [
@@ -1458,21 +1470,36 @@ export default function HomePage() {
                 </p>
               </div>
 
-              {/* Form */}
-              <form onSubmit={(e) => e.preventDefault()} className="flex flex-col sm:flex-row items-center gap-3 max-w-xl">
-                <input
-                  type="email"
-                  placeholder="What's your email?"
-                  className="w-full sm:flex-1 px-4 py-2.5 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
-                  required
-                />
-                <button
-                  type="submit"
-                  className="w-full sm:w-auto px-6 py-2.5 bg-brass hover:bg-brass-deep text-white font-medium text-xs rounded-lg transition-colors cursor-pointer shadow-xs"
-                >
-                  Subscribe
-                </button>
-              </form>
+              {/* Form / Success Notification */}
+              {newsletterSubscribed ? (
+                <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-medium flex items-center justify-between shadow-xs">
+                  <span>✓ Thank you for subscribing to RealInsight! You will receive our latest real estate market reports and articles in your inbox.</span>
+                  <button
+                    type="button"
+                    onClick={() => setNewsletterSubscribed(false)}
+                    className="text-emerald-600 hover:text-emerald-900 font-bold ml-2 cursor-pointer"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleNewsletterSubmit} className="flex flex-col sm:flex-row items-center gap-3 max-w-xl">
+                  <input
+                    type="email"
+                    value={newsletterEmail}
+                    onChange={(e) => setNewsletterEmail(e.target.value)}
+                    placeholder="What's your email?"
+                    className="w-full sm:flex-1 px-4 py-2.5 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
+                    required
+                  />
+                  <button
+                    type="submit"
+                    className="w-full sm:w-auto px-6 py-2.5 bg-brass hover:bg-brass-deep text-white font-medium text-xs rounded-lg transition-colors cursor-pointer shadow-xs"
+                  >
+                    Subscribe
+                  </button>
+                </form>
+              )}
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-ink-soft gap-2 pt-1">
                 <span>

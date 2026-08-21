@@ -6,20 +6,39 @@ import { EyebrowLabel } from "@/components/EyebrowLabel";
 import { Card } from "@/components/Card";
 import { Badge } from "@/components/Badge";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+import { getApiUrl } from "@/lib/config";
 
 export default function NewHomesPage() {
   const [listings, setListings] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${API_URL}/listings?tag=new_construction&page_size=9`)
+    const apiUrl = getApiUrl();
+    fetch(`${apiUrl}/listings?tag=new_construction&page_size=9`)
       .then((res) => res.json())
       .then((data) => {
-        setListings(data.results || []);
-        setLoading(false);
+        if (data.results && data.results.length > 0) {
+          setListings(data.results);
+          setLoading(false);
+        } else {
+          fetch(`${apiUrl}/listings?page_size=9`)
+            .then((r) => r.json())
+            .then((d) => {
+              setListings(d.results || []);
+              setLoading(false);
+            })
+            .catch(() => setLoading(false));
+        }
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        fetch(`${apiUrl}/listings?page_size=9`)
+          .then((r) => r.json())
+          .then((d) => {
+            setListings(d.results || []);
+            setLoading(false);
+          })
+          .catch(() => setLoading(false));
+      });
   }, []);
 
   return (

@@ -30,31 +30,22 @@ export const MapPlaceholder: React.FC<MapPlaceholderProps> = ({
     <div
       className={`w-full h-80 bg-[#E5E9EC] border border-line rounded-2xl relative overflow-hidden flex flex-col justify-between p-4 shadow-inner ${className}`}
     >
-      {/* Real Google Maps Embed Background if API Key is Present */}
-      {googleApiKey ? (
-        <iframe
-          className="absolute inset-0 w-full h-full border-0 pointer-events-none opacity-60"
-          loading="lazy"
-          allowFullScreen
-          src={`https://www.google.com/maps/embed/v1/place?key=${googleApiKey}&q=${encodeURIComponent(
-            `${address}, ${city}, TX`
-          )}&zoom=13`}
-        />
-      ) : (
-        /* Map vector grid background styling fallback */
-        <div className="absolute inset-0 opacity-25 pointer-events-none">
-          <svg width="100%" height="100%">
-            <defs>
-              <pattern id="map-grid" width="60" height="60" patternUnits="userSpaceOnUse">
-                <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#94A3B8" strokeWidth="1" />
-                <path d="M 0 30 L 60 30 M 30 0 L 30 60" fill="none" stroke="#CBD5E1" strokeWidth="0.5" strokeDasharray="3,3" />
-                <circle cx="30" cy="30" r="1.5" fill="var(--brass)" />
-              </pattern>
-            </defs>
-            <rect width="100%" height="100%" fill="url(#map-grid)" />
-          </svg>
-        </div>
-      )}
+      {/* Real Live Google Maps Embed Background */}
+      <iframe
+        className="absolute inset-0 w-full h-full border-0 opacity-80"
+        loading="lazy"
+        allowFullScreen
+        src={
+          googleApiKey
+            ? `https://www.google.com/maps/embed/v1/place?key=${googleApiKey}&q=${encodeURIComponent(
+                `${address}, ${city}, TX`
+              )}&zoom=13`
+            : `https://maps.google.com/maps?q=${encodeURIComponent(
+                `${address}, ${city}, TX`
+              )}&t=&z=13&ie=UTF8&iwloc=&output=embed`
+        }
+      />
+
 
       {/* Header Info Bar */}
       <div className="z-10 flex items-center justify-between pointer-events-none">
