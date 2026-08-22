@@ -23,7 +23,7 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ) => {
     const shouldReduceMotion = useReducedMotion();
 
-    let baseStyles =
+    const baseStyles =
       "inline-flex items-center justify-center font-medium transition-colors duration-200 rounded-lg cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed text-sm select-none";
 
     let variantStyles = "";

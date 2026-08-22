@@ -1390,10 +1390,10 @@ export default function HomePage() {
               <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer">
                 <div className="p-6 flex-1 space-y-2">
                   <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
-                    5 Signs You're Financially Ready to Buy a Home
+                    5 Signs You&apos;re Financially Ready to Buy a Home
                   </h4>
                   <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
-                    Think you're ready to buy a home? Learn five financial signs that can help you decide if now is the right time to make your move.
+                    Think you&apos;re ready to buy a home? Learn five financial signs that can help you decide if now is the right time to make your move.
                   </p>
                 </div>
                 <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
