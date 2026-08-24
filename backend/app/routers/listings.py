@@ -3,7 +3,7 @@ import shutil
 import uuid
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, selectinload
 from sqlalchemy import func
 
 from ..database import get_db
@@ -81,7 +81,16 @@ def get_listings(
     # Pagination calculation
     total_count = query.count()
     offset = (page - 1) * page_size
-    results = query.offset(offset).limit(page_size).all()
+    results = (
+        query.options(
+            selectinload(Listing.images),
+            selectinload(Listing.agent),
+            selectinload(Listing.price_history)
+        )
+        .offset(offset)
+        .limit(page_size)
+        .all()
+    )
 
     return {
         "total": total_count,

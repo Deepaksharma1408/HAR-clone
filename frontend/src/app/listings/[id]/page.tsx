@@ -84,6 +84,22 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
   const [showAmortizationTable, setShowAmortizationTable] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
 
+  // Keyboard navigation for Lightbox fullscreen viewer
+  useEffect(() => {
+    if (!showLightbox) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowRight") {
+        setActivePhotoIndex((prev) => (prev + 1) % (listing?.images?.length || 1));
+      } else if (e.key === "ArrowLeft") {
+        setActivePhotoIndex((prev) => (prev - 1 + (listing?.images?.length || 1)) % (listing?.images?.length || 1));
+      } else if (e.key === "Escape") {
+        setShowLightbox(false);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [showLightbox, listing?.images?.length]);
+
   useEffect(() => {
     if (typeof window !== "undefined") {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
@@ -433,40 +449,60 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-8"
+              className="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex flex-col items-center justify-between p-4 sm:p-6 select-none"
               onClick={() => setShowLightbox(false)}
             >
-              <button
-                onClick={() => setShowLightbox(false)}
-                className="absolute top-6 right-6 text-white text-3xl font-bold hover:text-brass p-2 cursor-pointer z-10"
-                aria-label="Close Fullscreen"
-              >
-                ✕
-              </button>
+              {/* Top Controls Bar */}
+              <div className="w-full max-w-6xl flex items-center justify-between z-50 text-white px-2 py-1">
+                <span className="text-white/90 text-sm font-mono font-medium">
+                  Photo {(activePhotoIndex % listing.images.length) + 1} of {listing.images.length} · {listing.address}
+                </span>
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowLightbox(false);
+                  }}
+                  className="w-10 h-10 rounded-full bg-white/20 hover:bg-brass text-white text-xl font-bold flex items-center justify-center cursor-pointer transition-all shadow-lg hover:scale-105"
+                  aria-label="Close Fullscreen"
+                >
+                  ✕
+                </button>
+              </div>
 
+              {/* Main Image Area with Prominent Left/Right Buttons */}
               <div
-                className="relative max-w-5xl max-h-[85vh] w-full flex items-center justify-center"
+                className="relative max-w-6xl max-h-[75vh] w-full flex-1 flex items-center justify-center my-auto"
                 onClick={(e) => e.stopPropagation()}
               >
                 <img
+                  key={activePhotoIndex}
                   src={getImageUrl(listing.images[activePhotoIndex % listing.images.length].image_url)}
                   alt={`${listing.address} full photo`}
-                  className="max-w-full max-h-[80vh] object-contain rounded-xl shadow-2xl"
+                  className="max-w-full max-h-[72vh] object-contain rounded-xl shadow-2xl transition-all duration-300"
                 />
 
                 {listing.images.length > 1 && (
                   <>
                     <button
-                      onClick={() => setActivePhotoIndex((prev) => (prev - 1 + listing.images.length) % listing.images.length)}
-                      className="absolute left-2 sm:-left-12 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 hover:bg-brass text-white flex items-center justify-center text-2xl font-bold cursor-pointer transition-all"
-                      aria-label="Previous"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIndex((prev) => (prev - 1 + listing.images.length) % listing.images.length);
+                      }}
+                      className="absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/75 hover:bg-brass border border-white/30 text-white flex items-center justify-center text-3xl font-bold cursor-pointer transition-all shadow-2xl hover:scale-110 z-50 active:scale-95"
+                      aria-label="Previous Photo"
                     >
                       ‹
                     </button>
                     <button
-                      onClick={() => setActivePhotoIndex((prev) => (prev + 1) % listing.images.length)}
-                      className="absolute right-2 sm:-right-12 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-white/20 hover:bg-brass text-white flex items-center justify-center text-2xl font-bold cursor-pointer transition-all"
-                      aria-label="Next"
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActivePhotoIndex((prev) => (prev + 1) % listing.images.length);
+                      }}
+                      className="absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-black/75 hover:bg-brass border border-white/30 text-white flex items-center justify-center text-3xl font-bold cursor-pointer transition-all shadow-2xl hover:scale-110 z-50 active:scale-95"
+                      aria-label="Next Photo"
                     >
                       ›
                     </button>
@@ -474,9 +510,36 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                 )}
               </div>
 
-              <span className="text-white/80 text-sm font-mono mt-4">
-                Photo {(activePhotoIndex % listing.images.length) + 1} of {listing.images.length} · {listing.address}
-              </span>
+              {/* Bottom Thumbnail Strip */}
+              {listing.images.length > 1 && (
+                <div
+                  className="z-50 max-w-2xl w-full flex items-center justify-center gap-2 overflow-x-auto py-2 px-4 no-scrollbar"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  {listing.images.map((img, idx) => {
+                    const isSelected = (activePhotoIndex % listing.images.length) === idx;
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setActivePhotoIndex(idx);
+                        }}
+                        className={`relative w-14 h-10 sm:w-16 sm:h-12 rounded-lg overflow-hidden shrink-0 border-2 transition-all cursor-pointer ${
+                          isSelected ? "border-brass scale-105 shadow-md" : "border-white/30 opacity-60 hover:opacity-100 hover:border-white"
+                        }`}
+                      >
+                        <img
+                          src={getImageUrl(img.image_url)}
+                          alt={`Thumbnail ${idx + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </motion.div>
           )}
         </AnimatePresence>
