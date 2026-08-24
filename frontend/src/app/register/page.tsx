@@ -35,6 +35,9 @@ export default function RegisterPage() {
     setError(null);
     setLoading(true);
 
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+
     try {
       const apiUrl = getApiUrl();
       const res = await fetch(`${apiUrl}/auth/register`, {
@@ -42,7 +45,9 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, full_name: fullName, role }),
         credentials: "include",
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
 
       const data = await res.json();
 
@@ -53,9 +58,14 @@ export default function RegisterPage() {
       } else {
         setError(data.detail || "Unable to register. Please check your form details.");
       }
-    } catch (err) {
-      console.error(err);
-      setError("Unable to connect to authentication services.");
+    } catch (err: any) {
+      clearTimeout(timeoutId);
+      console.error("Register Error:", err);
+      if (err.name === "AbortError") {
+        setError("Connection timed out. Please check backend server status.");
+      } else {
+        setError("Unable to connect to authentication services. Ensure API server is reachable.");
+      }
     } finally {
       setLoading(false);
     }

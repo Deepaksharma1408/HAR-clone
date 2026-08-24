@@ -58,7 +58,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
             msg.attach(MIMEText(text_body, "plain"))
             msg.attach(MIMEText(html_body, "html"))
 
-            with smtplib.SMTP(smtp_host, smtp_port) as server:
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=5) as server:
                 server.starttls()
                 server.login(smtp_user, smtp_password)
                 server.sendmail(smtp_from, [email], msg.as_string())
