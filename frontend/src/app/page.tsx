@@ -1520,7 +1520,7 @@ export default function HomePage() {
                     type="email"
                     value={newsletterEmail}
                     onChange={(e) => setNewsletterEmail(e.target.value)}
-                    placeholder="What's your email?"
+                    placeholder="Enter Email"
                     className="w-full sm:flex-1 px-4 py-2.5 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                     required
                   />
