@@ -166,7 +166,7 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
             # Re-send verification OTP for existing unverified user
             otp = generate_6digit_otp()
             existing_user.otp_code = otp
-            existing_user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+            existing_user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
             existing_user.hashed_password = hash_password(user_data.password)
             existing_user.full_name = user_data.full_name
             existing_user.role = user_data.role
@@ -175,7 +175,7 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
             background_tasks.add_task(send_otp_email, existing_user.email, otp, "Registration Verification")
 
             return AuthStepResponse(
-                message=f"Account registration pending verification. A 6-digit security OTP has been sent to {existing_user.email}.",
+                message=f"Account registration pending verification. A dynamic 6-digit security OTP has been instantly sent to {existing_user.email}.",
                 email=existing_user.email,
                 requires_otp=True
             )
@@ -197,7 +197,7 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
         full_name=user_data.full_name,
         is_verified=False,
         otp_code=otp,
-        otp_expires_at=datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+        otp_expires_at=datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
     )
     db.add(new_user)
     db.commit()
@@ -358,14 +358,14 @@ def resend_otp(req: ResendOTPRequest, background_tasks: BackgroundTasks, db: Ses
 
     otp = generate_6digit_otp()
     user.otp_code = otp
-    user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
+    user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
     db.commit()
 
     purpose = "Account Verification" if not user.is_verified else "Login Authentication"
     background_tasks.add_task(send_otp_email, user.email, otp, purpose)
 
     return AuthStepResponse(
-        message=f"A new 6-digit OTP code has been sent to {user.email}.",
+        message=f"A new dynamic 6-digit OTP code has been instantly sent to {user.email}.",
         email=user.email,
         requires_otp=True
     )
