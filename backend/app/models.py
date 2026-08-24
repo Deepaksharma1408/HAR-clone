@@ -39,20 +39,20 @@ class Listing(Base):
     __tablename__ = "listings"
 
     id = Column(Integer, primary_key=True, index=True)
-    agent_id = Column(Integer, ForeignKey("agents.id", ondelete="CASCADE"), nullable=False)
+    agent_id = Column(Integer, ForeignKey("agents.id", ondelete="CASCADE"), index=True, nullable=False)
     address = Column(String, nullable=False)
-    city = Column(String, nullable=False)
-    price = Column(Float, nullable=False)
-    type = Column(String, nullable=False)  # "For Sale", "For Rent", "Commercial"
-    status = Column(String, nullable=False)  # "active", "sold", "unpublished"
-    beds = Column(Integer, nullable=True)
+    city = Column(String, index=True, nullable=False)
+    price = Column(Float, index=True, nullable=False)
+    type = Column(String, index=True, nullable=False)  # "For Sale", "For Rent", "Commercial"
+    status = Column(String, index=True, nullable=False)  # "active", "sold", "unpublished"
+    beds = Column(Integer, index=True, nullable=True)
     baths = Column(Float, nullable=True)
     sqft = Column(Integer, nullable=True)
     lot_size = Column(Float, nullable=True)
     description = Column(Text, nullable=True)
     hue_color = Column(String, nullable=True)  # For placeholder art
     open_house_time = Column(String, nullable=True)  # e.g., "Saturday, 10:00 AM – 2:00 PM"
-    created_at = Column(DateTime, default=datetime.datetime.utcnow)
+    created_at = Column(DateTime, index=True, default=datetime.datetime.utcnow)
 
     # Relationships
     agent = relationship("Agent", back_populates="listings")

@@ -268,7 +268,23 @@ function ListingsContent() {
   const [loading, setLoading] = useState(true);
 
   const fetchListings = async () => {
-    setLoading(true);
+    const cacheKey = `estateline_listings_${selectedType}_${tagInput}_${appliedCity}_${maxPrice}_${minBeds}_${sortOption}_${page}`;
+    
+    // Check if we have cached results for instant display
+    try {
+      const cached = sessionStorage.getItem(cacheKey);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setListings(parsed.results || []);
+        setTotalCount(parsed.total || 0);
+        setLoading(false);
+      } else {
+        setLoading(true);
+      }
+    } catch {
+      setLoading(true);
+    }
+
     try {
       const params = new URLSearchParams();
       if (selectedType) params.append("type", selectedType);
@@ -285,6 +301,9 @@ function ListingsContent() {
         const data = await res.json();
         setListings(data.results || []);
         setTotalCount(data.total || 0);
+        try {
+          sessionStorage.setItem(cacheKey, JSON.stringify(data));
+        } catch {}
       }
     } catch (err) {
       console.error("Error fetching listings:", err);

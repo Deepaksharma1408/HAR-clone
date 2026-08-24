@@ -371,29 +371,53 @@ export default function HomePage() {
   }, [carouselSlides.length]);
 
   useEffect(() => {
+    // Instant cache restore if available for 0ms render
+    try {
+      const cached = sessionStorage.getItem("estateline_home_data");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (parsed.stats) setStats(parsed.stats);
+        if (parsed.listings) setFeaturedListings(parsed.listings);
+        if (parsed.agents) setAgents(parsed.agents);
+        setLoading(false);
+      }
+    } catch {}
+
     const fetchData = async () => {
       try {
         const apiUrl = getApiUrl();
-        // Fetch stats
-        const statsRes = await fetch(`${apiUrl}/listings/stats`);
-        if (statsRes.ok) {
-          const statsData = await statsRes.json();
-          setStats(statsData);
-        }
+        const [statsRes, listingsRes, agentsRes] = await Promise.all([
+          fetch(`${apiUrl}/listings/stats`),
+          fetch(`${apiUrl}/listings?page_size=6`),
+          fetch(`${apiUrl}/agents`),
+        ]);
 
-        // Fetch first 6 listings
-        const listingsRes = await fetch(`${apiUrl}/listings?page_size=6`);
+        let newStats = stats;
+        let newListings = featuredListings;
+        let newAgents = agents;
+
+        if (statsRes.ok) {
+          newStats = await statsRes.json();
+          setStats(newStats);
+        }
         if (listingsRes.ok) {
           const listingsData = await listingsRes.json();
-          setFeaturedListings(listingsData.results || []);
+          newListings = listingsData.results || [];
+          setFeaturedListings(newListings);
         }
-
-        // Fetch agents
-        const agentsRes = await fetch(`${apiUrl}/agents`);
         if (agentsRes.ok) {
           const agentsData = await agentsRes.json();
-          setAgents((agentsData || []).slice(0, 4));
+          newAgents = (agentsData || []).slice(0, 4);
+          setAgents(newAgents);
         }
+
+        try {
+          sessionStorage.setItem("estateline_home_data", JSON.stringify({
+            stats: newStats,
+            listings: newListings,
+            agents: newAgents
+          }));
+        } catch {}
       } catch (err) {
         console.error("Error fetching homepage data:", err);
       } finally {

@@ -17,11 +17,30 @@ from ..schemas import (
     AgentDetailResponse,
     ListingStatsResponse
 )
+import time
 from .auth import get_current_user, get_current_agent
 
 router = APIRouter(prefix="", tags=["listings"])
 
 UPLOAD_DIR = "uploads"
+
+# High-Speed In-Memory Cache (TTL: 30s)
+_CACHE = {}
+_CACHE_TTL = 30
+
+def get_from_cache(key: str):
+    if key in _CACHE:
+        data, expires_at = _CACHE[key]
+        if time.time() < expires_at:
+            return data
+        del _CACHE[key]
+    return None
+
+def set_in_cache(key: str, data, ttl: int = _CACHE_TTL):
+    _CACHE[key] = (data, time.time() + ttl)
+
+def clear_listings_cache():
+    _CACHE.clear()
 
 def format_price(price: float, type_str: str) -> str:
     if type_str == "For Rent":
@@ -31,14 +50,20 @@ def format_price(price: float, type_str: str) -> str:
 # GET /listings/stats - Dynamic statistics counters
 @router.get("/listings/stats", response_model=ListingStatsResponse)
 def get_listing_stats(db: Session = Depends(get_db)):
+    cached = get_from_cache("stats")
+    if cached is not None:
+        return cached
+
     total = db.query(func.count(Listing.id)).scalar() or 0
     active = db.query(func.count(Listing.id)).filter(Listing.status == "active").scalar() or 0
     agents = db.query(func.count(Agent.id)).scalar() or 0
-    return {
+    data = {
         "total_listings": total,
         "active_listings": active,
         "agent_count": agents
     }
+    set_in_cache("stats", data, ttl=60)
+    return data
 
 from ..services.listings_filter import build_listings_filter_query
 
@@ -57,6 +82,11 @@ def get_listings(
     page_size: int = 10,
     db: Session = Depends(get_db)
 ):
+    cache_key = f"listings:{type}:{tag}:{min_price}:{max_price}:{min_beds}:{min_baths}:{city}:{sort}:{page}:{page_size}"
+    cached = get_from_cache(cache_key)
+    if cached is not None:
+        return cached
+
     filter_params = {
         "type": type,
         "tag": tag,
@@ -92,12 +122,14 @@ def get_listings(
         .all()
     )
 
-    return {
+    response_payload = {
         "total": total_count,
         "page": page,
         "page_size": page_size,
         "results": [ListingResponse.model_validate(r) for r in results]
     }
+    set_in_cache(cache_key, response_payload, ttl=30)
+    return response_payload
 
 # GET /listings/mine - Get all listings (active and unpublished) owned by current agent
 @router.get("/listings/mine", response_model=List[ListingResponse])
@@ -205,6 +237,7 @@ def create_listing(
     db.add(price_history)
     db.commit()
     db.refresh(new_listing)
+    clear_listings_cache()
 
     return new_listing
 
@@ -251,6 +284,7 @@ def update_listing(
 
     db.commit()
     db.refresh(listing)
+    clear_listings_cache()
     return listing
 
 # DELETE /listings/{id} - Protected Delete Listing (Must Own)
@@ -276,6 +310,7 @@ def delete_listing(
 
     db.delete(listing)
     db.commit()
+    clear_listings_cache()
     return {"status": "success", "message": "Listing deleted successfully."}
 
 # POST /listings/{id}/images - Upload Images
