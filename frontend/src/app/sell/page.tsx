@@ -128,7 +128,7 @@ export default function SellPage() {
                         required
                         value={name}
                         onChange={(e) => setName(e.target.value)}
-                        placeholder="e.g. John Doe"
+                        placeholder="Enter Name"
                         className="w-full px-4 py-2.5 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                       />
                     </div>
@@ -139,7 +139,7 @@ export default function SellPage() {
                         required
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        placeholder="e.g. john@example.com"
+                        placeholder="Enter Email"
                         className="w-full px-4 py-2.5 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                       />
                     </div>
@@ -149,7 +149,7 @@ export default function SellPage() {
                         type="tel"
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
-                        placeholder="(713) 555-0199"
+                        placeholder="Enter Mobile"
                         className="w-full px-4 py-2.5 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                       />
                     </div>

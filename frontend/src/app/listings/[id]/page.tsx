@@ -833,7 +833,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                     required
                     value={leadName}
                     onChange={(e) => setLeadName(e.target.value)}
-                    placeholder="Jane Doe"
+                    placeholder="Enter Name"
                     disabled={leadSubmitting}
                   />
 
@@ -842,7 +842,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                     type="tel"
                     value={leadPhone}
                     onChange={(e) => setLeadPhone(e.target.value)}
-                    placeholder="(832) 555-0199"
+                    placeholder="Enter Mobile"
                     disabled={leadSubmitting}
                   />
 
@@ -1007,7 +1007,7 @@ export default function ListingDetailPage({ params }: { params: Promise<{ id: st
                       <input
                         type="text"
                         required
-                        placeholder="Jane Doe"
+                        placeholder="Enter Name"
                         className="w-full px-4 py-2.5 bg-bg border border-line rounded-lg focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                       />
                     </div>

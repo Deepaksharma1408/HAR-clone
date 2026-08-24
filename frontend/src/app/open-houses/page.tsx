@@ -274,7 +274,7 @@ export default function OpenHousesPage() {
                         required
                         value={rsvpName}
                         onChange={(e) => setRsvpName(e.target.value)}
-                        placeholder="John Doe"
+                        placeholder="Enter Name"
                         className="w-full px-3.5 py-2 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                       />
                     </div>
@@ -286,7 +286,7 @@ export default function OpenHousesPage() {
                         required
                         value={rsvpEmail}
                         onChange={(e) => setRsvpEmail(e.target.value)}
-                        placeholder="john@example.com"
+                        placeholder="Enter Email"
                         className="w-full px-3.5 py-2 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                       />
                     </div>
@@ -298,7 +298,7 @@ export default function OpenHousesPage() {
                           type="tel"
                           value={rsvpPhone}
                           onChange={(e) => setRsvpPhone(e.target.value)}
-                          placeholder="(713) 555-0100"
+                          placeholder="Enter Mobile"
                           className="w-full px-3.5 py-2 bg-bg border border-line rounded-lg text-xs font-inter focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15"
                         />
                       </div>
