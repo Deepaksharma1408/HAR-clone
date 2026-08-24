@@ -223,8 +223,6 @@ function AlertsContent() {
     );
   }
 
-  if (!user) return null;
-
   return (
     <div className="estateline-container py-12 space-y-10">
       {/* Title Header */}

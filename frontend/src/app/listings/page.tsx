@@ -266,6 +266,59 @@ function ListingsContent() {
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [saveAlertStatus, setSaveAlertStatus] = useState<"idle" | "saving" | "saved">("idle");
+
+  const handleSaveSearch = async () => {
+    setSaveAlertStatus("saving");
+    const searchTitle = [
+      cityInput ? formatCityTitle(cityInput) : "",
+      selectedType && selectedType !== "All" ? selectedType : "",
+      minBeds ? `${minBeds}+ Beds` : "",
+    ].filter(Boolean).join(" · ") || "Custom Portfolio Alert";
+
+    const newAlert = {
+      id: Date.now(),
+      name: searchTitle,
+      filters: {
+        type: selectedType && selectedType !== "All" ? selectedType : null,
+        max_price: maxPrice ? Number(maxPrice) : null,
+        min_beds: minBeds ? Number(minBeds) : null,
+        city: cityInput || null,
+      },
+      created_at: new Date().toISOString(),
+    };
+
+    // 1. Save to local storage for instant availability
+    try {
+      const existing = JSON.parse(localStorage.getItem("estateline_saved_alerts") || "[]");
+      const updated = [newAlert, ...existing.filter((a: any) => a.name !== searchTitle)];
+      localStorage.setItem("estateline_saved_alerts", JSON.stringify(updated));
+    } catch {}
+
+    // 2. If logged in, also sync to backend
+    const token = typeof window !== "undefined" ? localStorage.getItem("estateline_token") : null;
+    if (token) {
+      try {
+        await fetch(`${API_URL}/alerts`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            name: searchTitle,
+            filters: newAlert.filters,
+          }),
+          credentials: "include",
+        });
+      } catch {}
+    }
+
+    setSaveAlertStatus("saved");
+    setTimeout(() => {
+      setSaveAlertStatus("idle");
+    }, 3500);
+  };
 
   // Auto-filter on City typing (350ms debounce)
   useEffect(() => {
@@ -866,25 +919,17 @@ function ListingsContent() {
 
             <div className="space-y-2 pt-2 border-t border-line">
               <Button
-                variant="brass"
+                variant={saveAlertStatus === "saved" ? "sage" : "brass"}
                 size="sm"
-                className="w-full cursor-pointer font-semibold shadow-xs"
-                onClick={() => {
-                  const params = new URLSearchParams();
-                  if (cityInput) params.append("city", cityInput);
-                  if (selectedType && selectedType !== "All") params.append("type", selectedType);
-                  if (maxPrice) params.append("max_price", maxPrice);
-                  if (minBeds) params.append("min_beds", minBeds);
-                  const searchTitle = [
-                    cityInput || "",
-                    selectedType && selectedType !== "All" ? selectedType : "",
-                    minBeds ? `${minBeds}+ Beds` : "",
-                  ].filter(Boolean).join(" · ") || "Custom Portfolio Alert";
-                  params.append("name", searchTitle);
-                  router.push(`/account/alerts?${params.toString()}`);
-                }}
+                className="w-full cursor-pointer font-semibold shadow-xs transition-all duration-200"
+                onClick={handleSaveSearch}
+                disabled={saveAlertStatus === "saving"}
               >
-                🔔 Save This Search
+                {saveAlertStatus === "saved"
+                  ? "✓ Search Saved!"
+                  : saveAlertStatus === "saving"
+                  ? "Saving Alert..."
+                  : "🔔 Save This Search"}
               </Button>
 
               <Button
