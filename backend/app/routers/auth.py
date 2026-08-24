@@ -168,8 +168,20 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
             existing_user.otp_code = otp
             existing_user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
             existing_user.hashed_password = hash_password(user_data.password)
-            existing_user.full_name = user_data.full_name
+            existing_user.full_name = user_data.full_name.strip()
             existing_user.role = user_data.role
+            
+            # Ensure agent profile exists if role is agent
+            if existing_user.role == "agent":
+                agent_exists = db.query(Agent).filter(Agent.user_id == existing_user.id).first()
+                if not agent_exists:
+                    new_agent = Agent(
+                        user_id=existing_user.id,
+                        role_title="Licensed Real Estate Agent at Estateline",
+                        bio="A professional agent ready to help you find your dream home."
+                    )
+                    db.add(new_agent)
+            
             db.commit()
 
             background_tasks.add_task(send_otp_email, existing_user.email, otp, "Registration Verification")
@@ -191,10 +203,10 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
     
     # Create user as unverified
     new_user = User(
-        email=user_data.email,
+        email=email_clean,
         hashed_password=hashed_pw,
         role=user_data.role,
-        full_name=user_data.full_name,
+        full_name=user_data.full_name.strip(),
         is_verified=False,
         otp_code=otp,
         otp_expires_at=datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
@@ -205,19 +217,21 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
 
     # If role is agent, also create Agent row
     if new_user.role == "agent":
-        new_agent = Agent(
-            user_id=new_user.id,
-            role_title="Licensed Real Estate Agent at Estateline",
-            bio="A professional agent ready to help you find your dream home."
-        )
-        db.add(new_agent)
-        db.commit()
+        agent_exists = db.query(Agent).filter(Agent.user_id == new_user.id).first()
+        if not agent_exists:
+            new_agent = Agent(
+                user_id=new_user.id,
+                role_title="Licensed Real Estate Agent at Estateline",
+                bio="A professional agent ready to help you find your dream home."
+            )
+            db.add(new_agent)
+            db.commit()
 
     # Send verification email with OTP in background task (instant response)
     background_tasks.add_task(send_otp_email, new_user.email, otp, "Registration Verification")
 
     return AuthStepResponse(
-        message=f"Registration successful! A 6-digit security OTP code has been sent to {new_user.email}.",
+        message=f"Registration successful! A dynamic 6-digit security OTP code has been sent to {new_user.email}.",
         email=new_user.email,
         requires_otp=True
     )
