@@ -39,37 +39,67 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
   const [favoriteIds, setFavoriteIds] = useState<number[]>([]);
   const [loading, setLoading] = useState(false);
 
+  // Initialize from localStorage on first mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("estateline_favorites_ids");
+      if (stored) {
+        const ids = JSON.parse(stored);
+        if (Array.isArray(ids)) {
+          setFavoriteIds(ids);
+        }
+      }
+    } catch {}
+  }, []);
+
+  const getAuthHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("estateline_token");
+      if (token) headers["Authorization"] = `Bearer ${token}`;
+    }
+    return headers;
+  };
+
   const fetchFavorites = async () => {
+    // If not logged in, fetch listing details for locally stored favoriteIds
     if (!user) {
-      setFavoriteListings([]);
-      setFavoriteIds([]);
+      const stored = localStorage.getItem("estateline_favorites_ids");
+      if (stored) {
+        try {
+          const ids: number[] = JSON.parse(stored);
+          if (ids.length > 0) {
+            const res = await fetch(`${API_URL}/listings?page_size=36`);
+            if (res.ok) {
+              const data = await res.json();
+              const matched = (data.results || []).filter((l: ListingItem) => ids.includes(l.id));
+              setFavoriteListings(matched);
+            }
+          }
+        } catch {}
+      }
       return;
     }
 
     setLoading(true);
     try {
-      const headers: Record<string, string> = { "Content-Type": "application/json" };
-      if (typeof window !== "undefined") {
-        const token = localStorage.getItem("estateline_token");
-        if (token) headers["Authorization"] = `Bearer ${token}`;
-      }
-
       const res = await fetch(`${API_URL}/favorites`, {
         method: "GET",
-        headers,
+        headers: getAuthHeaders(),
         credentials: "include",
       });
 
       if (res.ok) {
         const data: ListingItem[] = await res.json();
         setFavoriteListings(data || []);
-        setFavoriteIds((data || []).map((item) => item.id));
-      } else if (res.status === 401) {
-        setFavoriteListings([]);
-        setFavoriteIds([]);
+        const ids = (data || []).map((item) => item.id);
+        setFavoriteIds(ids);
+        try {
+          localStorage.setItem("estateline_favorites_ids", JSON.stringify(ids));
+        } catch {}
       }
     } catch {
-      // Silently handle network interruptions for unauthenticated guests
+      // Silently handle network interruptions
     } finally {
       setLoading(false);
     }
@@ -89,44 +119,53 @@ export const FavoritesProvider: React.FC<{ children: React.ReactNode }> = ({ chi
       e.stopPropagation();
     }
 
-    // If user is NOT logged in, redirect to login page instead of failing
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-
     const currentlyFav = isFavorite(listingId);
+    const updatedIds = currentlyFav
+      ? favoriteIds.filter((id) => id !== listingId)
+      : [...favoriteIds, listingId];
+
+    // 1. Instant optimistic state update
+    setFavoriteIds(updatedIds);
+    try {
+      localStorage.setItem("estateline_favorites_ids", JSON.stringify(updatedIds));
+    } catch {}
 
     if (currentlyFav) {
-      // Optimistic update
-      setFavoriteIds((prev) => prev.filter((id) => id !== listingId));
       setFavoriteListings((prev) => prev.filter((item) => item.id !== listingId));
+    }
 
+    // 2. Sync with backend API
+    const token = typeof window !== "undefined" ? localStorage.getItem("estateline_token") : null;
+    if (user || token) {
       try {
-        await fetch(`${API_URL}/favorites/${listingId}`, {
-          method: "DELETE",
-          credentials: "include",
-        });
-      } catch (err) {
-        console.error("Error removing favorite:", err);
-        fetchFavorites(); // Re-sync on failure
-      }
-    } else {
-      // Optimistic update ID
-      setFavoriteIds((prev) => [...prev, listingId]);
-
-      try {
-        const res = await fetch(`${API_URL}/favorites/${listingId}`, {
-          method: "POST",
-          credentials: "include",
-        });
-        if (res.ok) {
-          fetchFavorites(); // Re-fetch to get full listing object
+        if (currentlyFav) {
+          await fetch(`${API_URL}/favorites/${listingId}`, {
+            method: "DELETE",
+            headers: getAuthHeaders(),
+            credentials: "include",
+          });
+        } else {
+          const res = await fetch(`${API_URL}/favorites/${listingId}`, {
+            method: "POST",
+            headers: getAuthHeaders(),
+            credentials: "include",
+          });
+          if (res.ok) {
+            fetchFavorites();
+          }
         }
       } catch (err) {
-        console.error("Error adding favorite:", err);
-        fetchFavorites();
+        console.error("Error syncing favorite:", err);
       }
+    } else if (!currentlyFav) {
+      // For guest, fetch listing item to display in favorites immediately
+      try {
+        const res = await fetch(`${API_URL}/listings/${listingId}`);
+        if (res.ok) {
+          const single = await res.json();
+          setFavoriteListings((prev) => [...prev.filter((p) => p.id !== listingId), single]);
+        }
+      } catch {}
     }
   };
 

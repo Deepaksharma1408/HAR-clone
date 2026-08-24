@@ -15,8 +15,16 @@ def build_listings_filter_query(
     query = db.query(Listing).filter(Listing.status == "active")
 
     type_val = filter_params.get("type")
-    if type_val:
-        query = query.filter(Listing.type == type_val)
+    if type_val and type_val.strip() and type_val.lower() != "all":
+        clean_type = type_val.strip()
+        if clean_type.lower() in ["villa", "luxury villa"]:
+            query = query.filter(Listing.type.ilike("%villa%"))
+        else:
+            query = query.filter(Listing.type.ilike(f"%{clean_type}%"))
+
+    amenity_val = filter_params.get("amenity")
+    if amenity_val:
+        query = query.filter(Listing.description.ilike(f"%{amenity_val}%"))
 
     min_price = filter_params.get("min_price")
     if min_price is not None:

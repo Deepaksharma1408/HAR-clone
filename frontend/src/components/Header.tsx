@@ -475,14 +475,27 @@ export const Header: React.FC = () => {
           {/* Heart Favorites Count Badge - hidden on mobile, shown md+ */}
           <Link
             href="/account/favorites"
-            className="relative p-2 text-ink hover:text-danger transition-colors hidden md:flex items-center justify-center hover:bg-bg rounded-full cursor-pointer"
-            title="Saved Favorites"
+            className={`relative p-2 transition-all duration-200 hidden md:flex items-center justify-center hover:bg-bg rounded-full cursor-pointer group ${
+              favoriteCount > 0 ? "text-danger hover:scale-105" : "text-ink hover:text-danger"
+            }`}
+            title={favoriteCount > 0 ? `${favoriteCount} Saved Favorites` : "Saved Favorites"}
           >
-            <svg className="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <svg
+              className={`w-5 h-5 transition-transform duration-200 ${
+                favoriteCount > 0 ? "fill-danger text-danger scale-110" : "fill-none"
+              }`}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
             </svg>
             {favoriteCount > 0 && (
-              <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-brass text-white text-[10px] font-inter rounded-full min-w-[18px] text-center font-bold shadow-xs leading-none">
+              <span className="absolute -top-1 -right-1 px-1.5 py-0.5 bg-danger text-white text-[10px] font-inter rounded-full min-w-[18px] text-center font-bold shadow-xs leading-none">
                 {favoriteCount}
               </span>
             )}
@@ -586,14 +599,27 @@ export const Header: React.FC = () => {
           {/* Mobile Heart Favorites Icon */}
           <Link
             href="/account/favorites"
-            className="md:hidden relative p-2 text-ink hover:text-danger transition-colors flex items-center"
+            className={`md:hidden relative p-2 transition-all flex items-center ${
+              favoriteCount > 0 ? "text-danger" : "text-ink hover:text-danger"
+            }`}
             title="Saved Favorites"
           >
-            <svg className="w-5 h-5 fill-none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            <svg
+              className={`w-5 h-5 transition-transform ${
+                favoriteCount > 0 ? "fill-danger text-danger scale-110" : "fill-none"
+              }`}
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"
+              />
             </svg>
             {favoriteCount > 0 && (
-              <span className="absolute -top-1 -right-1 px-1.5 py-0.2 bg-brass text-white text-[10px] font-inter rounded-full min-w-[16px] text-center font-bold">
+              <span className="absolute -top-1 -right-1 px-1.5 py-0.2 bg-danger text-white text-[10px] font-inter rounded-full min-w-[16px] text-center font-bold">
                 {favoriteCount}
               </span>
             )}

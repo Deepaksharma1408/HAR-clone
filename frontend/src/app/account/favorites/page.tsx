@@ -17,12 +17,6 @@ export default function AccountFavoritesPage() {
   const { user, loading: authLoading } = useAuth();
   const { favoriteListings, isFavorite, toggleFavorite, loading: favLoading } = useFavorites();
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
-    }
-  }, [user, authLoading, router]);
-
   const formatPrice = (price: number, type: string) => {
     if (type === "For Rent") return `$${price.toLocaleString()}/mo`;
     return `$${price.toLocaleString()}`;
@@ -37,8 +31,6 @@ export default function AccountFavoritesPage() {
       </div>
     );
   }
-
-  if (!user) return null;
 
   return (
     <div className="flex flex-col min-h-screen bg-bg">

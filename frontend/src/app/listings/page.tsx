@@ -259,7 +259,7 @@ function ListingsContent() {
   }, [searchParams]);
 
   // Visual-only amenity chips state
-  const [selectedAmenities, setSelectedAmenities] = useState<string[]>(["Pool"]);
+  const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
 
   // Results & Pagination state
   const [listings, setListings] = useState<ListingItem[]>([]);
@@ -267,8 +267,18 @@ function ListingsContent() {
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
 
+  // Auto-filter on City typing (350ms debounce)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setAppliedCity(cityInput.trim());
+      setPage(1);
+    }, 350);
+    return () => clearTimeout(timer);
+  }, [cityInput]);
+
   const fetchListings = async () => {
-    const cacheKey = `estateline_listings_${selectedType}_${tagInput}_${appliedCity}_${maxPrice}_${minBeds}_${sortOption}_${page}`;
+    const amenityParam = selectedAmenities.length > 0 ? selectedAmenities[0] : "";
+    const cacheKey = `estateline_listings_${selectedType}_${tagInput}_${appliedCity}_${maxPrice}_${minBeds}_${amenityParam}_${sortOption}_${page}`;
     
     // Check if we have cached results for instant display
     try {
@@ -287,11 +297,12 @@ function ListingsContent() {
 
     try {
       const params = new URLSearchParams();
-      if (selectedType) params.append("type", selectedType);
+      if (selectedType && selectedType !== "All") params.append("type", selectedType);
       if (tagInput) params.append("tag", tagInput);
       if (appliedCity) params.append("city", appliedCity);
       if (maxPrice) params.append("max_price", maxPrice);
       if (minBeds) params.append("min_beds", minBeds);
+      if (amenityParam) params.append("amenity", amenityParam);
       if (sortOption) params.append("sort", sortOption);
       params.append("page", page.toString());
       params.append("page_size", "9");
@@ -314,7 +325,7 @@ function ListingsContent() {
 
   useEffect(() => {
     fetchListings();
-  }, [selectedType, tagInput, appliedCity, maxPrice, minBeds, sortOption, page]);
+  }, [selectedType, tagInput, appliedCity, maxPrice, minBeds, selectedAmenities, sortOption, page]);
 
   const handleCitySearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -326,8 +337,9 @@ function ListingsContent() {
     if (selectedAmenities.includes(name)) {
       setSelectedAmenities(selectedAmenities.filter((a) => a !== name));
     } else {
-      setSelectedAmenities([...selectedAmenities, name]);
+      setSelectedAmenities([name]); // Focus on selected amenity for immediate visual & query filtering
     }
+    setPage(1);
   };
 
   const formatPrice = (price: number, type: string) => {
@@ -873,12 +885,16 @@ function ListingsContent() {
               <Button
                 variant="outline"
                 size="sm"
-                className="w-full"
+                className="w-full cursor-pointer"
                 onClick={() => {
                   setCityInput("");
+                  setAppliedCity("");
                   setSelectedType("");
+                  setTagInput("");
                   setMaxPrice("");
                   setMinBeds("");
+                  setSelectedAmenities([]);
+                  setSchoolDistrict("all");
                   setSortOption("newest");
                   setPage(1);
                 }}
