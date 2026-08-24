@@ -119,9 +119,39 @@ def get_current_agent(current_user: User = Depends(get_current_user)) -> User:
     return current_user
 
 
+import re
+
+FAKE_DOMAINS = {
+    "fake.com", "test.com", "example.com", "dummy.com", "asdf.com",
+    "tempmail.com", "mailinator.com", "invalid.com", "sample.com",
+    "temp.com", "10minutemail.com", "dispostable.com", "guerrillamail.com", "trashmail.com"
+}
+
+def validate_email_address(email: str) -> str:
+    email_clean = email.strip().lower()
+    pattern = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+    if not re.match(pattern, email_clean):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email format. Please enter a valid email address (e.g. name@gmail.com).",
+        )
+    parts = email_clean.split("@")
+    if len(parts) != 2:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid email address.",
+        )
+    domain = parts[1]
+    if domain in FAKE_DOMAINS or len(parts[0]) < 2 or "." not in domain:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Please provide a valid, active email address (e.g. Gmail, Yahoo, Outlook, etc.).",
+        )
+    return email_clean
+
 @router.post("/register", response_model=AuthStepResponse)
 def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    email_clean = user_data.email.strip().lower()
+    email_clean = validate_email_address(user_data.email)
     existing_user = db.query(User).filter(User.email == email_clean).first()
     
     if existing_user:

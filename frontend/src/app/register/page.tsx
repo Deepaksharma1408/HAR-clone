@@ -29,10 +29,41 @@ export default function RegisterPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  const validateEmailClient = (rawEmail: string): string | null => {
+    const clean = rawEmail.trim().toLowerCase();
+    if (!clean) return "Email address is required.";
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!emailRegex.test(clean)) {
+      return "Invalid email address. Please enter a valid email (e.g. name@gmail.com).";
+    }
+    const parts = clean.split("@");
+    if (parts.length !== 2) return "Invalid email address.";
+    const [userPart, domainPart] = parts;
+    if (userPart.length < 2) return "Email username is too short.";
+    if (!domainPart.includes(".")) return "Email must include a valid domain extension.";
+    
+    const fakeDomains = [
+      "fake.com", "test.com", "example.com", "dummy.com", "asdf.com", 
+      "tempmail.com", "mailinator.com", "invalid.com", "sample.com", 
+      "temp.com", "10minutemail.com", "dispostable.com", "trashmail.com"
+    ];
+    if (fakeDomains.includes(domainPart)) {
+      return "Please enter a valid, active email address (e.g. Gmail, Yahoo, Outlook, etc.).";
+    }
+    return null;
+  };
+
   // Step 1 Submit: Register and request OTP
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+
+    const emailErr = validateEmailClient(email);
+    if (emailErr) {
+      setError(emailErr);
+      return;
+    }
+
     setLoading(true);
 
     const controller = new AbortController();
@@ -43,7 +74,7 @@ export default function RegisterPage() {
       const res = await fetch(`${apiUrl}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, full_name: fullName, role }),
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password, full_name: fullName.trim(), role }),
         credentials: "include",
         signal: controller.signal,
       });
