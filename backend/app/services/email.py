@@ -30,7 +30,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
 --------------------------------------------------------------------------------
   RECIPIENT : {email}
   VERIFICATION CODE (OTP) : >>>  {otp_code}  <<<
-  EXPIRES IN : 10 Minutes
+  EXPIRES IN : 5 Minutes
 ================================================================================
 """
     print(banner, flush=True)
@@ -42,7 +42,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
       <div style="background-color: #F6F4EF; border: 1px solid #B8862E; text-align: center; padding: 18px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #B8862E; margin: 20px 0;">
         {otp_code}
       </div>
-      <p style="font-size: 12px; color: #888888; margin-top: 20px;">This code will expire in 10 minutes. If you did not request this account verification, please ignore this email.</p>
+      <p style="font-size: 12px; color: #888888; margin-top: 20px;">This code will expire in 5 minutes. If you did not request this account verification, please ignore this email.</p>
     </div>
     """
 
@@ -54,7 +54,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
             msg["From"] = f"Estateline Security <{smtp_from}>"
             msg["To"] = email
 
-            text_body = f"Hello,\n\nYour Estateline 6-digit security verification code for {purpose} is: {otp_code}\n\nThis code expires in 10 minutes.\n\nThank you,\nEstateline Team"
+            text_body = f"Hello,\n\nYour Estateline 6-digit security verification code for {purpose} is: {otp_code}\n\nThis code expires in 5 minutes.\n\nThank you,\nEstateline Team"
             msg.attach(MIMEText(text_body, "plain"))
             msg.attach(MIMEText(html_body, "html"))
 

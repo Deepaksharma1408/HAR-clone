@@ -8,9 +8,7 @@ import { Card } from "@/components/Card";
 import { Input } from "@/components/Input";
 import { Button } from "@/components/Button";
 import { EyebrowLabel } from "@/components/EyebrowLabel";
-
 import { useSearchParams } from "next/navigation";
-
 import { getApiUrl } from "@/lib/config";
 
 function LoginFormContent() {
@@ -18,109 +16,45 @@ function LoginFormContent() {
   const searchParams = useSearchParams();
   const { refreshUser, setUserState } = useAuth();
 
-  // Step 1: Credentials
-  const [step, setStep] = useState<1 | 2>(1);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
-  // Step 2: OTP State
-  const [otpCode, setOtpCode] = useState("");
-  const [infoMessage, setInfoMessage] = useState<string | null>(
+  const [infoMessage] = useState<string | null>(
     searchParams?.get("verified") === "true"
       ? "🎉 Account verified successfully! Please log in below with your email & password."
       : null
   );
-
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  // Step 1 Submit: Validate credentials & request login OTP
-  const handleLoginRequestSubmit = async (e: React.FormEvent) => {
+  // Direct login submit handler
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
     try {
       const apiUrl = getApiUrl();
-      const res = await fetch(`${apiUrl}/auth/login-request-otp`, {
+      const res = await fetch(`${apiUrl}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
+        credentials: "include",
       });
 
       const data = await res.json();
 
       if (res.ok) {
-        setInfoMessage(data.message || `A 6-digit security OTP code has been sent to ${email}.`);
-        setOtpCode(""); // User must type OTP manually for true security
-        setStep(2);
-      } else {
-        setError(data.detail || "Authentication failed. Incorrect email or password.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Unable to connect to authentication services.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Step 2 Submit: Verify 6-digit Login Security OTP
-  const handleVerifyLoginOTP = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
-
-    try {
-      const apiUrl = getApiUrl();
-      const res = await fetch(`${apiUrl}/auth/login-verify-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, otp_code: otpCode }),
-        credentials: "include",
-      });
-
-      if (res.ok) {
-        const data = await res.json();
         if (data && data.user) {
           setUserState(data.user, data.access_token);
         }
         await refreshUser();
         router.push("/");
       } else {
-        const errorData = await res.json().catch(() => ({ detail: "Verification failed." }));
-        setError(errorData.detail || "Invalid or expired security OTP code.");
+        setError(data.detail || "Authentication failed. Incorrect email or password.");
       }
     } catch (err) {
       console.error(err);
-      setError("Network error verifying login OTP code.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Resend OTP Code
-  const handleResendOTP = async () => {
-    setError(null);
-    setLoading(true);
-
-    try {
-      const apiUrl = getApiUrl();
-      const res = await fetch(`${apiUrl}/auth/resend-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await res.json();
-      if (res.ok) {
-        setInfoMessage(data.message || `A fresh 6-digit OTP code has been sent to ${email}.`);
-      } else {
-        setError(data.detail || "Unable to resend OTP code.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError("Network error resending security OTP code.");
+      setError("Unable to connect to authentication services.");
     } finally {
       setLoading(false);
     }
@@ -134,13 +68,11 @@ function LoginFormContent() {
             <div className="text-center mb-8">
               <EyebrowLabel className="mb-2">Portal Access</EyebrowLabel>
               <h1 className="font-fraunces text-3xl font-semibold text-ink mt-1">
-                {step === 1 ? "Welcome back" : "Security 2FA Verification"}
+                Welcome back
                 <span className="text-brass">.</span>
               </h1>
               <p className="text-xs text-ink-soft mt-2">
-                {step === 1
-                  ? "Sign in to manage your listings or saved properties."
-                  : `Enter the 6-digit security OTP sent to ${email}`}
+                Sign in to manage your listings or saved properties.
               </p>
             </div>
 
@@ -154,94 +86,45 @@ function LoginFormContent() {
             )}
 
             {/* Success / Info Banner */}
-            {infoMessage && step === 2 && (
+            {infoMessage && (
               <div className="mb-5 p-3.5 bg-brass/10 border border-brass/30 rounded-xl">
                 <p className="text-xs text-ink leading-relaxed font-medium">
-                  ✉️ {infoMessage}
+                  {infoMessage}
                 </p>
               </div>
             )}
 
-            {/* Step 1: Login Form */}
-            {step === 1 ? (
-              <form onSubmit={handleLoginRequestSubmit} className="space-y-4">
-                <Input
-                  label="Email Address"
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="architect@estateline.com"
-                  disabled={loading}
-                />
+            {/* Direct Login Form */}
+            <form onSubmit={handleLoginSubmit} className="space-y-4">
+              <Input
+                label="Email Address"
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="architect@estateline.com"
+                disabled={loading}
+              />
 
-                <Input
-                  label="Password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  disabled={loading}
-                />
+              <Input
+                label="Password"
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                disabled={loading}
+              />
 
-                <Button
-                  type="submit"
-                  variant="brass"
-                  className="w-full py-3 mt-4"
-                  disabled={loading}
-                >
-                  {loading ? "Authenticating..." : "Continue with Email OTP →"}
-                </Button>
-              </form>
-            ) : (
-              /* Step 2: 6-Digit Login Security OTP Form */
-              <form onSubmit={handleVerifyLoginOTP} className="space-y-4">
-                <div>
-                  <label className="block text-[13px] font-medium text-ink-soft mb-2">
-                    6-Digit Security Login OTP
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={6}
-                    value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="123456"
-                    className="w-full bg-bg text-ink text-center tracking-[0.4em] font-mono text-2xl py-3 rounded-xl border border-line focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15 transition-all"
-                    disabled={loading}
-                  />
-                </div>
-
-                <Button
-                  type="submit"
-                  variant="brass"
-                  className="w-full py-3 mt-4"
-                  disabled={loading || otpCode.length < 6}
-                >
-                  {loading ? "Verifying Security OTP..." : "Authenticate & Sign In →"}
-                </Button>
-
-                <div className="flex items-center justify-between pt-4 border-t border-line text-xs">
-                  <button
-                    type="button"
-                    onClick={() => setStep(1)}
-                    className="text-ink-soft hover:text-ink font-medium cursor-pointer"
-                    disabled={loading}
-                  >
-                    ← Edit Credentials
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleResendOTP}
-                    className="text-brass hover:text-brass-deep font-semibold cursor-pointer"
-                    disabled={loading}
-                  >
-                    Resend Code ↺
-                  </button>
-                </div>
-              </form>
-            )}
+              <Button
+                type="submit"
+                variant="brass"
+                className="w-full py-3 mt-4"
+                disabled={loading}
+              >
+                {loading ? "Signing In..." : "Sign In →"}
+              </Button>
+            </form>
 
             <div className="text-center mt-6 pt-5 border-t border-line text-xs text-ink-soft">
               Don&apos;t have an account?{" "}

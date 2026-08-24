@@ -118,7 +118,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
             # Re-send verification OTP for existing unverified user
             otp = generate_6digit_otp()
             existing_user.otp_code = otp
-            existing_user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+            existing_user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
             existing_user.hashed_password = hash_password(user_data.password)
             existing_user.full_name = user_data.full_name
             existing_user.role = user_data.role
@@ -150,7 +150,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
         full_name=user_data.full_name,
         is_verified=False,
         otp_code=otp,
-        otp_expires_at=datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+        otp_expires_at=datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
     )
     db.add(new_user)
     db.commit()
@@ -207,9 +207,8 @@ def verify_registration_otp(req: VerifyOTPRequest, response: Response, db: Sessi
     return user
 
 
-@router.post("/login", response_model=AuthStepResponse)
-@router.post("/login-request-otp", response_model=AuthStepResponse)
-def login_request_otp(login_data: UserLogin, db: Session = Depends(get_db)):
+@router.post("/login")
+def login(login_data: UserLogin, response: Response, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == login_data.email).first()
     if not user or not verify_password(login_data.password, user.hashed_password):
         raise HTTPException(
@@ -218,32 +217,35 @@ def login_request_otp(login_data: UserLogin, db: Session = Depends(get_db)):
         )
 
     if not user.is_verified:
-        # Prompt user to complete registration verification
-        otp = generate_6digit_otp()
-        user.otp_code = otp
-        user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
-        db.commit()
-        send_otp_email(user.email, otp, "Registration Verification")
-        
-        return AuthStepResponse(
-            message=f"Account not verified yet. A 6-digit security OTP code has been sent to {user.email}.",
-            email=user.email,
-            requires_otp=True
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Account is not verified yet. Please register or verify your account with the OTP sent to your email.",
         )
 
-    # Generate 2FA Login OTP
-    otp = generate_6digit_otp()
-    user.otp_code = otp
-    user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
-    db.commit()
+    token_data = {"sub": user.email, "role": user.role}
+    token = create_access_token(token_data)
 
-    send_otp_email(user.email, otp, "Login Security Authentication")
-
-    return AuthStepResponse(
-        message=f"Credentials verified! A 6-digit security OTP code has been sent to {user.email}.",
-        email=user.email,
-        requires_otp=True
+    response.set_cookie(
+        key=COOKIE_NAME,
+        value=token,
+        httponly=True,
+        max_age=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        expires=ACCESS_TOKEN_EXPIRE_DAYS * 24 * 3600,
+        samesite="lax",
+        secure=False,
+        path="/"
     )
+
+    return {
+        "status": "success",
+        "access_token": token,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "full_name": user.full_name,
+            "role": user.role
+        }
+    }
 
 
 @router.post("/login-verify-otp")
@@ -309,7 +311,7 @@ def resend_otp(req: ResendOTPRequest, db: Session = Depends(get_db)):
 
     otp = generate_6digit_otp()
     user.otp_code = otp
-    user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=10)
+    user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=5)
     db.commit()
 
     purpose = "Account Verification" if not user.is_verified else "Login Authentication"
