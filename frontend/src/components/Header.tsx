@@ -196,9 +196,8 @@ export const Header: React.FC = () => {
           <div className="relative" onMouseEnter={() => setBuyRentOpen(true)} onMouseLeave={() => setBuyRentOpen(false)}>
             <button
               onClick={() => setBuyRentOpen(!buyRentOpen)}
-              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${
-                isBuyRentActive ? "text-brass font-bold" : "text-ink hover:text-brass"
-              }`}
+              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${isBuyRentActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+                }`}
             >
               <span>Buy/Rent</span>
               <span className="text-[11px] opacity-70">▾</span>
@@ -219,9 +218,8 @@ export const Header: React.FC = () => {
                 >
                   <Link
                     href="/listings"
-                    className={`block px-4 py-2.5 hover:bg-bg hover:text-brass font-medium text-sm transition-colors ${
-                      pathname === "/listings" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2.5 hover:bg-bg hover:text-brass font-medium text-sm transition-colors ${pathname === "/listings" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setBuyRentOpen(false)}
                   >
                     All Properties
@@ -276,9 +274,8 @@ export const Header: React.FC = () => {
           {/* Home Values Link */}
           <Link
             href="/home-value"
-            className={`transition-colors font-semibold py-2 cursor-pointer relative ${
-              isHomeValuesActive ? "text-brass font-bold" : "text-ink hover:text-brass"
-            }`}
+            className={`transition-colors font-semibold py-2 cursor-pointer relative ${isHomeValuesActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+              }`}
           >
             Home Values
             {isHomeValuesActive && (
@@ -290,9 +287,8 @@ export const Header: React.FC = () => {
           <div className="relative" onMouseEnter={() => setExploreOpen(true)} onMouseLeave={() => setExploreOpen(false)}>
             <button
               onClick={() => setExploreOpen(!exploreOpen)}
-              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${
-                isExploreActive ? "text-brass font-bold" : "text-ink hover:text-brass"
-              }`}
+              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${isExploreActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+                }`}
             >
               <span>Explore</span>
               <span className="text-[11px] opacity-70">▾</span>
@@ -347,9 +343,8 @@ export const Header: React.FC = () => {
           {/* Agents Directory Link */}
           <Link
             href="/agents"
-            className={`transition-colors font-semibold py-2 relative ${
-              isAgentsActive ? "text-brass font-bold" : "text-ink hover:text-brass"
-            }`}
+            className={`transition-colors font-semibold py-2 relative ${isAgentsActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+              }`}
           >
             Agents
             {isAgentsActive && (
@@ -360,9 +355,8 @@ export const Header: React.FC = () => {
           {/* Mortgage Calculator Modal Launcher */}
           <button
             onClick={() => setShowMortgageModal(true)}
-            className={`transition-colors font-semibold py-2 cursor-pointer relative ${
-              isMortgageActive ? "text-brass font-bold" : "text-ink hover:text-brass"
-            }`}
+            className={`transition-colors font-semibold py-2 cursor-pointer relative ${isMortgageActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+              }`}
           >
             Mortgage
             {isMortgageActive && (
@@ -374,9 +368,8 @@ export const Header: React.FC = () => {
           <div className="relative" onMouseEnter={() => setMoreOpen(true)} onMouseLeave={() => setMoreOpen(false)}>
             <button
               onClick={() => setMoreOpen(!moreOpen)}
-              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${
-                isMoreActive ? "text-brass font-bold" : "text-ink hover:text-brass"
-              }`}
+              className={`flex items-center gap-1.5 transition-colors py-2 font-semibold cursor-pointer relative ${isMoreActive ? "text-brass font-bold" : "text-ink hover:text-brass"
+                }`}
             >
               <span>More...</span>
               <span className="text-[11px] opacity-70">▾</span>
@@ -397,54 +390,48 @@ export const Header: React.FC = () => {
                 >
                   <Link
                     href="/open-houses"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🗓️ Weekend Open Houses
                   </Link>
                   <Link
                     href="/sell"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/sell" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/sell" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🏷️ Sell &amp; List Your Home
                   </Link>
                   <Link
                     href="/neighborhoods"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🏘️ Neighborhood Explorer
                   </Link>
                   <Link
                     href="/schools"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/schools" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/schools" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🎓 Texas School Finder
                   </Link>
                   <Link
                     href="/drive-time"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     ⏱️ Commute &amp; Drive-Time Search
                   </Link>
                   <Link
                     href="/compare"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/compare" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/compare" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     ⚖️ Side-by-Side Property Comparison
@@ -452,18 +439,16 @@ export const Header: React.FC = () => {
                   <div className="border-t border-line my-1"></div>
                   <Link
                     href="/account/alerts"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/account/alerts" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/account/alerts" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     🔔 Saved Search Alerts
                   </Link>
                   <Link
                     href="/account/favorites"
-                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                      pathname === "/account/favorites" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                    }`}
+                    className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/account/favorites" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                      }`}
                     onClick={() => setMoreOpen(false)}
                   >
                     ♥ Saved Favorites ({favoriteCount})
@@ -471,9 +456,8 @@ export const Header: React.FC = () => {
                   {user?.role === "agent" && (
                     <Link
                       href="/dashboard"
-                      className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${
-                        pathname === "/dashboard" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
-                      }`}
+                      className={`block px-4 py-2 hover:bg-bg hover:text-brass font-medium text-xs transition-colors ${pathname === "/dashboard" ? "bg-brass/10 text-brass font-bold border-l-2 border-brass" : "text-ink"
+                        }`}
                       onClick={() => setMoreOpen(false)}
                     >
                       🏛 Agent Control Panel
@@ -666,9 +650,8 @@ export const Header: React.FC = () => {
                 <Link
                   href="/listings"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/listings" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/listings" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   All Properties
                 </Link>
@@ -700,63 +683,56 @@ export const Header: React.FC = () => {
                 <Link
                   href="/open-houses"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   🗓️ Weekend Open Houses
                 </Link>
                 <Link
                   href="/sell"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/sell" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/sell" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   🏷️ Sell &amp; List Your Home
                 </Link>
                 <Link
                   href="/home-value"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/home-value" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/home-value" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   📈 Home Valuation Estimator
                 </Link>
                 <Link
                   href="/neighborhoods"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   🏘️ Neighborhood Explorer
                 </Link>
                 <Link
                   href="/schools"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/schools" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/schools" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   🎓 Texas School Finder
                 </Link>
                 <Link
                   href="/drive-time"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   ⏱️ Commute &amp; Drive-Time Search
                 </Link>
                 <Link
                   href="/compare"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname === "/compare" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname === "/compare" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   📊 Side-by-Side Property Comparison
                 </Link>
@@ -772,9 +748,8 @@ export const Header: React.FC = () => {
                 <Link
                   href="/agents"
                   onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${
-                    pathname.startsWith("/agents") ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                  }`}
+                  className={`block py-1.5 font-medium transition-colors ${pathname.startsWith("/agents") ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                    }`}
                 >
                   🏛 Real Estate Agents Directory
                 </Link>
