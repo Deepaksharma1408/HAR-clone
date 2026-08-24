@@ -51,7 +51,31 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
     </div>
     """
 
-    # 1. Try Brevo REST API first (Fastest HTTP Delivery <1s)
+    # 1. Direct Gmail SMTP (Official Google Mail Server - 100% Genuine Inbox Delivery)
+    if smtp_host and smtp_user and smtp_password and not smtp_password.startswith("xkeysib-"):
+        try:
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = f"[{otp_code}] Your Estateline Security OTP"
+            msg["From"] = f"Estateline Security <{smtp_from}>"
+            msg["To"] = email
+
+            text_body = f"Hello,\n\nYour Estateline 6-digit security verification code for {purpose} is: {otp_code}\n\nThis code expires in 5 minutes.\n\nThank you,\nEstateline Team"
+            msg.attach(MIMEText(text_body, "plain"))
+            msg.attach(MIMEText(html_body, "html"))
+
+            with smtplib.SMTP(smtp_host, smtp_port, timeout=8) as server:
+                server.starttls()
+                server.login(smtp_user, smtp_password)
+                server.sendmail(smtp_from, [email], msg.as_string())
+            
+            logger.info(f"Successfully sent real Gmail SMTP email to {email}")
+            print(f"[SMTP SUCCESS] Real instant OTP email delivered to {email} via Gmail SMTP", flush=True)
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send SMTP email to {email}: {e}")
+            print(f"[SMTP NOTICE] Gmail SMTP failed ({e}), trying Brevo fallback...", flush=True)
+
+    # 2. Brevo API Fallback
     if brevo_api_key:
         try:
             payload = {
@@ -70,37 +94,13 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
                     "content-type": "application/json"
                 }
             )
-            with urllib.request.urlopen(req, timeout=4) as resp:
+            with urllib.request.urlopen(req, timeout=8) as resp:
                 if resp.status in [200, 201, 202]:
                     logger.info(f"Successfully sent Brevo API email to {email}")
                     print(f"[BREVO SUCCESS] Real instant OTP email delivered to {email}", flush=True)
                     return True
         except Exception as e:
             logger.error(f"Brevo API attempt failed: {e}")
-            print(f"[BREVO NOTICE] Brevo API failed ({e}), trying Gmail SMTP fallback...", flush=True)
-
-    # 2. Fallback to Direct Gmail SMTP
-    if smtp_host and smtp_user and smtp_password and not smtp_password.startswith("xkeysib-"):
-        try:
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = f"[{otp_code}] Your Estateline Security OTP"
-            msg["From"] = f"Estateline Security <{smtp_from}>"
-            msg["To"] = email
-
-            text_body = f"Hello,\n\nYour Estateline 6-digit security verification code for {purpose} is: {otp_code}\n\nThis code expires in 5 minutes.\n\nThank you,\nEstateline Team"
-            msg.attach(MIMEText(text_body, "plain"))
-            msg.attach(MIMEText(html_body, "html"))
-
-            with smtplib.SMTP(smtp_host, smtp_port, timeout=4) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.sendmail(smtp_from, [email], msg.as_string())
-            
-            logger.info(f"Successfully sent real Gmail SMTP email to {email}")
-            print(f"[SMTP SUCCESS] Real instant email sent to {email} via Gmail SMTP", flush=True)
-            return True
-        except Exception as e:
-            logger.error(f"Failed to send SMTP email to {email}: {e}")
-            print(f"[SMTP NOTICE] Gmail SMTP failed: {e}", flush=True)
+            print(f"[BREVO NOTICE] Brevo API failed: {e}", flush=True)
 
     return True

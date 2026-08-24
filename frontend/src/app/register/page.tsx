@@ -255,8 +255,8 @@ export default function RegisterPage() {
                     maxLength={6}
                     value={otpCode}
                     onChange={(e) => setOtpCode(e.target.value)}
-                    placeholder="123456"
-                    className="w-full bg-bg text-ink text-center tracking-[0.4em] font-mono text-2xl py-3 rounded-xl border border-line focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15 transition-all"
+                    placeholder="Enter OTP Here"
+                    className="w-full bg-bg text-ink text-center tracking-[0.4em] font-mono text-2xl py-3 rounded-xl border border-line focus:outline-none focus:border-brass focus:ring-2 focus:ring-brass/15 transition-all placeholder:tracking-normal placeholder:font-sans placeholder:text-sm placeholder:text-ink-soft/50"
                     disabled={loading}
                   />
                 </div>

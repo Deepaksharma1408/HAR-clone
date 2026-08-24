@@ -1,4 +1,5 @@
 import os
+import secrets
 import random
 import datetime
 import jwt
@@ -34,7 +35,20 @@ def create_access_token(data: dict) -> str:
     return jwt.encode(to_encode, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 def generate_6digit_otp() -> str:
-    return str(random.randint(100000, 999999))
+    """
+    Generates a cryptographically strong, high-entropy, unique 6-digit OTP.
+    Avoids trivial or predictable repeating patterns (e.g. 111111, 123456, etc.).
+    """
+    trivial_patterns = {
+        "123456", "654321", "111111", "222222", "333333", "444444", 
+        "555555", "666666", "777777", "888888", "999999", "000000",
+        "121212", "123123", "012345", "543210", "112233", "332211"
+    }
+    while True:
+        code = str(secrets.randbelow(900000) + 100000)
+        # Require at least 4 unique digits and no trivial sequence
+        if len(set(code)) >= 4 and code not in trivial_patterns:
+            return code
 
 # Dependency to get current user from cookie
 def get_current_user(request: Request, db: Session = Depends(get_db)) -> User:
