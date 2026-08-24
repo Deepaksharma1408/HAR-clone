@@ -868,14 +868,19 @@ function ListingsContent() {
               <Button
                 variant="brass"
                 size="sm"
-                className="w-full"
+                className="w-full cursor-pointer font-semibold shadow-xs"
                 onClick={() => {
                   const params = new URLSearchParams();
                   if (cityInput) params.append("city", cityInput);
-                  if (selectedType) params.append("type", selectedType);
+                  if (selectedType && selectedType !== "All") params.append("type", selectedType);
                   if (maxPrice) params.append("max_price", maxPrice);
                   if (minBeds) params.append("min_beds", minBeds);
-                  params.append("name", cityInput ? `${cityInput} Search Alert` : "Custom Search Alert");
+                  const searchTitle = [
+                    cityInput || "",
+                    selectedType && selectedType !== "All" ? selectedType : "",
+                    minBeds ? `${minBeds}+ Beds` : "",
+                  ].filter(Boolean).join(" · ") || "Custom Portfolio Alert";
+                  params.append("name", searchTitle);
                   router.push(`/account/alerts?${params.toString()}`);
                 }}
               >

@@ -48,19 +48,39 @@ function AlertsContent() {
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && !user) {
-      router.push("/login");
+  const getAuthHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("estateline_token");
+      if (token) headers["Authorization"] = `Bearer ${token}`;
     }
-  }, [user, authLoading, router]);
+    return headers;
+  };
 
   const fetchAlerts = async () => {
-    if (!user) return;
     setLoading(true);
+    const token = typeof window !== "undefined" ? localStorage.getItem("estateline_token") : null;
+
+    if (!user && !token) {
+      // Guest local storage fallback
+      try {
+        const stored = localStorage.getItem("estateline_saved_alerts");
+        if (stored) {
+          setAlerts(JSON.parse(stored));
+        } else {
+          setAlerts([]);
+        }
+      } catch {
+        setAlerts([]);
+      }
+      setLoading(false);
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/alerts`, {
         method: "GET",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         credentials: "include",
       });
 
@@ -72,6 +92,7 @@ function AlertsContent() {
         data.forEach(async (a) => {
           try {
             const matchRes = await fetch(`${API_URL}/alerts/${a.id}/matches`, {
+              headers: getAuthHeaders(),
               credentials: "include",
             });
             if (matchRes.ok) {
@@ -104,20 +125,41 @@ function AlertsContent() {
     setCreating(true);
     setError(null);
 
-    try {
-      const payload = {
-        name: alertName,
-        filters: {
-          type: filterType || null,
-          max_price: filterMaxPrice ? Number(filterMaxPrice) : null,
-          min_beds: filterMinBeds ? Number(filterMinBeds) : null,
-          city: filterCity || null,
-        },
-      };
+    const token = typeof window !== "undefined" ? localStorage.getItem("estateline_token") : null;
 
+    const payload = {
+      name: alertName,
+      filters: {
+        type: filterType || null,
+        max_price: filterMaxPrice ? Number(filterMaxPrice) : null,
+        min_beds: filterMinBeds ? Number(filterMinBeds) : null,
+        city: filterCity || null,
+      },
+    };
+
+    if (!user && !token) {
+      // Guest local save
+      const newAlert: SavedAlertItem = {
+        id: Date.now(),
+        name: alertName,
+        filters: payload.filters,
+        created_at: new Date().toISOString(),
+      };
+      const existing = alerts;
+      const updated = [newAlert, ...existing];
+      setAlerts(updated);
+      try {
+        localStorage.setItem("estateline_saved_alerts", JSON.stringify(updated));
+      } catch {}
+      setAlertName("");
+      setCreating(false);
+      return;
+    }
+
+    try {
       const res = await fetch(`${API_URL}/alerts`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: getAuthHeaders(),
         body: JSON.stringify(payload),
         credentials: "include",
       });
@@ -138,9 +180,20 @@ function AlertsContent() {
   };
 
   const handleDeleteAlert = async (id: number) => {
+    const token = typeof window !== "undefined" ? localStorage.getItem("estateline_token") : null;
+    if (!user && !token) {
+      const updated = alerts.filter((a) => a.id !== id);
+      setAlerts(updated);
+      try {
+        localStorage.setItem("estateline_saved_alerts", JSON.stringify(updated));
+      } catch {}
+      return;
+    }
+
     try {
       const res = await fetch(`${API_URL}/alerts/${id}`, {
         method: "DELETE",
+        headers: getAuthHeaders(),
         credentials: "include",
       });
       if (res.ok) {
