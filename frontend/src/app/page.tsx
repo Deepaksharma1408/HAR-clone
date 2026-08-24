@@ -1368,96 +1368,104 @@ export default function HomePage() {
             {/* 4 Article Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Article 1 */}
-              <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer">
-                <div className="p-6 flex-1 space-y-2">
-                  <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
-                    Why Townhomes Are a Secret Weapon for First-Time Buyers
-                  </h4>
-                  <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
-                    Townhomes can offer first-time buyers a practical path to homeownership, combining affordability, lower maintenance and desirable locations.
-                  </p>
+              <Link href="/articles/why-townhomes-secret-weapon" className="block">
+                <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer h-full">
+                  <div className="p-6 flex-1 space-y-2">
+                    <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
+                      Why Townhomes Are a Secret Weapon for First-Time Buyers
+                    </h4>
+                    <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
+                      Townhomes can offer first-time buyers a practical path to homeownership, combining affordability, lower maintenance and desirable locations.
+                    </p>
+                  </div>
+                  <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80"
+                      alt="Townhomes"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                 </div>
-                <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1512917774080-9991f1c4c750?auto=format&fit=crop&w=600&q=80"
-                    alt="Townhomes"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              </div>
+              </Link>
 
               {/* Article 2 */}
-              <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer">
-                <div className="p-6 flex-1 space-y-2">
-                  <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
-                    5 Signs You&apos;re Financially Ready to Buy a Home
-                  </h4>
-                  <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
-                    Think you&apos;re ready to buy a home? Learn five financial signs that can help you decide if now is the right time to make your move.
-                  </p>
+              <Link href="/articles/5-signs-financially-ready" className="block">
+                <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer h-full">
+                  <div className="p-6 flex-1 space-y-2">
+                    <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
+                      5 Signs You&apos;re Financially Ready to Buy a Home
+                    </h4>
+                    <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
+                      Think you&apos;re ready to buy a home? Learn five financial signs that can help you decide if now is the right time to make your move.
+                    </p>
+                  </div>
+                  <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80"
+                      alt="Financially Ready"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                 </div>
-                <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&w=600&q=80"
-                    alt="Financially Ready"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              </div>
+              </Link>
 
               {/* Article 3 */}
-              <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer">
-                <div className="p-6 flex-1 space-y-2">
-                  <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
-                    Want to Buy a Home in 2027? Here is What to Prepare Right Now
-                  </h4>
-                  <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
-                    Planning to buy a home in 2027? Learn the financial steps you can take today to make your future home purchase easier and less stressful.
-                  </p>
+              <Link href="/articles/want-to-buy-home-in-2027" className="block">
+                <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer h-full">
+                  <div className="p-6 flex-1 space-y-2">
+                    <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
+                      Want to Buy a Home in 2027? Here is What to Prepare Right Now
+                    </h4>
+                    <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
+                      Planning to buy a home in 2027? Learn the financial steps you can take today to make your future home purchase easier and less stressful.
+                    </p>
+                  </div>
+                  <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80"
+                      alt="Prepare Financials"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                 </div>
-                <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80"
-                    alt="Prepare Financials"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              </div>
+              </Link>
 
               {/* Article 4 */}
-              <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer">
-                <div className="p-6 flex-1 space-y-2">
-                  <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
-                    5 Steps to Take Before Making an Offer
-                  </h4>
-                  <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
-                    Buying a home soon? Learn the key steps to take before making an offer so you can shop with confidence and avoid common homebuying mistakes.
-                  </p>
+              <Link href="/articles/5-steps-before-making-offer" className="block">
+                <div className="bg-surface border border-line rounded-2xl overflow-hidden flex flex-col sm:flex-row hover:shadow-lg transition-shadow group cursor-pointer h-full">
+                  <div className="p-6 flex-1 space-y-2">
+                    <h4 className="font-fraunces font-bold text-sm text-ink group-hover:text-brass transition-colors leading-snug">
+                      5 Steps to Take Before Making an Offer
+                    </h4>
+                    <p className="text-xs text-ink-soft leading-relaxed line-clamp-3">
+                      Buying a home soon? Learn the key steps to take before making an offer so you can shop with confidence and avoid common homebuying mistakes.
+                    </p>
+                  </div>
+                  <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
+                    <img
+                      src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?auto=format&fit=crop&w=600&q=80"
+                      alt="Making an offer"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  </div>
                 </div>
-                <div className="w-full sm:w-44 h-36 relative overflow-hidden bg-bg flex-shrink-0">
-                  <img
-                    src="https://images.unsplash.com/photo-1560520653-9e0e4c89eb11?auto=format&fit=crop&w=600&q=80"
-                    alt="Making an offer"
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                  />
-                </div>
-              </div>
+              </Link>
             </div>
 
             <div className="flex justify-end">
-              <a href="#" className="text-xs font-medium text-brass hover:text-brass-deep transition-colors inline-flex items-center gap-1">
+              <Link href="/articles" className="text-xs font-medium text-brass hover:text-brass-deep transition-colors inline-flex items-center gap-1">
                 View more articles →
-              </a>
+              </Link>
             </div>
           </div>
 
           {/* 3. Real Insight Newsletter Subscription Banner */}
           <div className="bg-surface rounded-2xl p-8 md:p-10 border border-line flex flex-col md:flex-row items-start md:items-center gap-8 shadow-sm">
             {/* Logo Badge */}
-            <div className="border border-brass text-brass font-bold text-sm tracking-tight px-4 py-3 rounded-xl leading-tight text-center bg-bg shadow-xs flex-shrink-0">
+            <Link href="/articles" className="border border-brass text-brass font-bold text-sm tracking-tight px-4 py-3 rounded-xl leading-tight text-center bg-bg shadow-xs flex-shrink-0 hover:bg-brass/5 transition-colors">
               <div className="text-base font-extrabold border-b border-line pb-0.5">REAL</div>
               <div className="text-xs font-semibold pt-0.5">INSIGHT</div>
-            </div>
+            </Link>
 
             {/* Newsletter Details & Input */}
             <div className="flex-1 space-y-4">
@@ -1503,11 +1511,11 @@ export default function HomePage() {
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs text-ink-soft gap-2 pt-1">
                 <span>
-                  By subscribing, you accept our <a href="#" className="underline hover:text-ink">privacy policy</a>
+                  By subscribing, you accept our <Link href="/articles" className="underline hover:text-ink">privacy policy</Link>
                 </span>
 
                 <div className="flex items-center gap-2">
-                  <span className="font-medium text-ink">Go to RealInsight</span>
+                  <Link href="/articles" className="font-medium text-ink hover:text-brass transition-colors">Go to RealInsight</Link>
                   <span>or Follow Us</span>
                   <div className="flex items-center gap-1.5 ml-1">
                     <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">f</span>
