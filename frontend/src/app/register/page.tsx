@@ -52,10 +52,24 @@ export default function RegisterPage() {
       const data = await res.json();
 
       if (res.ok) {
+        if (data.already_exists) {
+          setInfoMessage("👋 An account with this email already exists. Opening Login window...");
+          setTimeout(() => {
+            router.push(`/login?email=${encodeURIComponent(email)}&existing=true`);
+          }, 600);
+          return;
+        }
         setInfoMessage(data.message || `A 6-digit security OTP code has been sent to ${email}.`);
         setOtpCode(""); // User must type OTP manually for true security
         setStep(2);
       } else {
+        if (data.detail && data.detail.toLowerCase().includes("already exists")) {
+          setInfoMessage("👋 An account with this email already exists. Opening Login window...");
+          setTimeout(() => {
+            router.push(`/login?email=${encodeURIComponent(email)}&existing=true`);
+          }, 600);
+          return;
+        }
         setError(data.detail || "Unable to register. Please check your form details.");
       }
     } catch (err: any) {
@@ -89,8 +103,8 @@ export default function RegisterPage() {
       if (res.ok) {
         setInfoMessage("🎉 Account verified successfully! Redirecting to Login...");
         setTimeout(() => {
-          router.push("/login?verified=true");
-        }, 1200);
+          router.push(`/login?email=${encodeURIComponent(email)}&verified=true`);
+        }, 800);
       } else {
         const errorData = await res.json().catch(() => ({ detail: "Verification failed." }));
         setError(errorData.detail || "Invalid or expired OTP code.");

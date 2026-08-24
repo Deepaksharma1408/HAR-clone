@@ -42,12 +42,13 @@ def generate_6digit_otp() -> str:
     trivial_patterns = {
         "123456", "654321", "111111", "222222", "333333", "444444", 
         "555555", "666666", "777777", "888888", "999999", "000000",
-        "121212", "123123", "012345", "543210", "112233", "332211"
+        "121212", "123123", "012345", "543210", "112233", "332211",
+        "234567", "765432", "345678", "876543", "456789", "987654"
     }
     while True:
         code = str(secrets.randbelow(900000) + 100000)
-        # Require at least 4 unique digits and no trivial sequence
-        if len(set(code)) >= 4 and code not in trivial_patterns:
+        # Require at least 5 unique digits for maximum entropy and authenticity
+        if len(set(code)) >= 5 and code not in trivial_patterns:
             return code
 
 # Dependency to get current user from cookie
@@ -120,13 +121,16 @@ def get_current_agent(current_user: User = Depends(get_current_user)) -> User:
 
 @router.post("/register", response_model=AuthStepResponse)
 def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    existing_user = db.query(User).filter(User.email == user_data.email).first()
+    email_clean = user_data.email.strip().lower()
+    existing_user = db.query(User).filter(User.email == email_clean).first()
     
     if existing_user:
         if existing_user.is_verified:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="An account with this email address already exists. Please log in.",
+            return AuthStepResponse(
+                message="An account with this email address already exists. Redirecting to Login...",
+                email=existing_user.email,
+                requires_otp=False,
+                already_exists=True
             )
         else:
             # Re-send verification OTP for existing unverified user
@@ -141,10 +145,9 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
             background_tasks.add_task(send_otp_email, existing_user.email, otp, "Registration Verification")
 
             return AuthStepResponse(
-                message=f"Account registration pending verification. Verification OTP code: {otp}",
+                message=f"Account registration pending verification. A 6-digit security OTP has been sent to {existing_user.email}.",
                 email=existing_user.email,
-                requires_otp=True,
-                otp_dev=otp
+                requires_otp=True
             )
 
     if user_data.role not in ["buyer", "agent"]:

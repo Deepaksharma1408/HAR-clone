@@ -16,11 +16,17 @@ function LoginFormContent() {
   const searchParams = useSearchParams();
   const { refreshUser, setUserState } = useAuth();
 
-  const [email, setEmail] = useState("");
+  const emailParam = searchParams?.get("email") || "";
+  const isVerified = searchParams?.get("verified") === "true";
+  const isExisting = searchParams?.get("existing") === "true";
+
+  const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
   const [infoMessage] = useState<string | null>(
-    searchParams?.get("verified") === "true"
+    isVerified
       ? "🎉 Account verified successfully! Please log in below with your email & password."
+      : isExisting
+      ? "👋 Welcome back! An account with this email already exists. Please enter your password to sign in."
       : null
   );
   const [error, setError] = useState<string | null>(null);

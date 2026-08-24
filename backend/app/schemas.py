@@ -45,6 +45,7 @@ class AuthStepResponse(BaseModel):
     email: str
     requires_otp: bool = True
     otp_dev: str | None = None
+    already_exists: bool = False
 
 # --- Listings Schemas ---
 

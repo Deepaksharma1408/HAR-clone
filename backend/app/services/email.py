@@ -41,25 +41,63 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
     print(banner, flush=True)
 
     html_body = f"""
-    <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #DAD5C8; border-radius: 12px; background-color: #FFFFFF;">
-      <h2 style="color: #16231C; margin-top: 0; font-size: 22px;">Estateline Security</h2>
-      <p style="font-size: 14px; color: #4B564E; margin-bottom: 20px;">Your 6-digit security verification code for <strong>{purpose}</strong> is:</p>
-      <div style="background-color: #F6F4EF; border: 1px solid #B8862E; text-align: center; padding: 18px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px; color: #B8862E; margin: 20px 0;">
-        {otp_code}
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F8F7F4; margin: 0; padding: 30px 15px;">
+      <div style="max-width: 520px; margin: 0 auto; background-color: #FFFFFF; border-radius: 16px; border: 1px solid #E5E0D8; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.05);">
+        <!-- Header -->
+        <div style="background-color: #16231C; padding: 28px 32px; text-align: center;">
+          <h1 style="color: #FFFFFF; font-size: 22px; margin: 0; letter-spacing: 2px; font-weight: 700;">ESTATELINE<span style="color: #B8862E;">.</span></h1>
+          <p style="color: #A3B1A8; font-size: 11px; margin: 6px 0 0; text-transform: uppercase; letter-spacing: 1.5px;">Official Security & Authentication</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 32px 32px 24px;">
+          <h2 style="color: #16231C; font-size: 18px; margin: 0 0 12px; font-weight: 600;">{purpose}</h2>
+          <p style="font-size: 14px; color: #4B564E; line-height: 1.6; margin: 0 0 24px;">
+            Please use the following 6-digit one-time verification code (OTP) to securely complete your Estateline portal registration:
+          </p>
+          
+          <!-- OTP Box -->
+          <div style="background: #F6F4EF; border: 1.5px solid #B8862E; border-radius: 12px; padding: 22px; text-align: center; margin-bottom: 24px;">
+            <span style="display: inline-block; font-family: 'Courier New', Courier, monospace; font-size: 36px; font-weight: 800; letter-spacing: 10px; color: #16231C;">
+              {otp_code}
+            </span>
+          </div>
+
+          <!-- Notice -->
+          <div style="background-color: #FAF9F6; border-left: 3px solid #B8862E; padding: 12px 16px; border-radius: 4px; margin-bottom: 24px;">
+            <p style="margin: 0; font-size: 12px; color: #6B7280; line-height: 1.5;">
+              ⏱ <strong>Expires in 5 minutes.</strong> Estateline representatives will never ask you for this code. Do not share it with anyone.
+            </p>
+          </div>
+
+          <p style="font-size: 12px; color: #9CA3AF; line-height: 1.5; margin: 0;">
+            If you did not request this verification code, please disregard this email or contact support.
+          </p>
+        </div>
+
+        <!-- Footer -->
+        <div style="background-color: #F8F7F4; border-top: 1px solid #E5E0D8; padding: 16px 32px; text-align: center;">
+          <p style="font-size: 11px; color: #9CA3AF; margin: 0;">
+            &copy; 2026 Estateline Inc. • All rights reserved • Architectural Real Estate Platform
+          </p>
+        </div>
       </div>
-      <p style="font-size: 12px; color: #888888; margin-top: 20px;">This code will expire in 5 minutes. If you did not request this account verification, please ignore this email.</p>
-    </div>
+    </body>
+    </html>
     """
 
     # 1. Direct Gmail SMTP (Official Google Mail Server - 100% Genuine Inbox Delivery)
     if smtp_host and smtp_user and smtp_password and not smtp_password.startswith("xkeysib-"):
         try:
             msg = MIMEMultipart("alternative")
-            msg["Subject"] = f"[{otp_code}] Your Estateline Security OTP"
+            msg["Subject"] = f"[{otp_code}] Your Estateline Security Verification Code"
             msg["From"] = f"Estateline Security <{smtp_from}>"
             msg["To"] = email
 
-            text_body = f"Hello,\n\nYour Estateline 6-digit security verification code for {purpose} is: {otp_code}\n\nThis code expires in 5 minutes.\n\nThank you,\nEstateline Team"
+            text_body = f"Hello,\n\nYour Estateline 6-digit verification code for {purpose} is: {otp_code}\n\nThis security code expires in 5 minutes.\n\nThank you,\nEstateline Security Team"
             msg.attach(MIMEText(text_body, "plain"))
             msg.attach(MIMEText(html_body, "html"))
 
