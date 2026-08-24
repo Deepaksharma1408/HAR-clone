@@ -3,7 +3,7 @@ import random
 import datetime
 import jwt
 import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
+from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, BackgroundTasks
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User, Agent
@@ -105,7 +105,7 @@ def get_current_agent(current_user: User = Depends(get_current_user)) -> User:
 
 
 @router.post("/register", response_model=AuthStepResponse)
-def register(user_data: UserRegister, db: Session = Depends(get_db)):
+def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     existing_user = db.query(User).filter(User.email == user_data.email).first()
     
     if existing_user:
@@ -124,7 +124,7 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
             existing_user.role = user_data.role
             db.commit()
 
-            send_otp_email(existing_user.email, otp, "Registration Verification")
+            background_tasks.add_task(send_otp_email, existing_user.email, otp, "Registration Verification")
 
             return AuthStepResponse(
                 message=f"Account registration pending verification. Verification OTP code: {otp}",
@@ -166,8 +166,8 @@ def register(user_data: UserRegister, db: Session = Depends(get_db)):
         db.add(new_agent)
         db.commit()
 
-    # Send verification email with OTP
-    send_otp_email(new_user.email, otp, "Registration Verification")
+    # Send verification email with OTP in background task (instant response)
+    background_tasks.add_task(send_otp_email, new_user.email, otp, "Registration Verification")
 
     return AuthStepResponse(
         message=f"Registration successful! A 6-digit security OTP code has been sent to {new_user.email}.",
@@ -301,7 +301,7 @@ def login_verify_otp(req: VerifyOTPRequest, response: Response, db: Session = De
 
 
 @router.post("/resend-otp", response_model=AuthStepResponse)
-def resend_otp(req: ResendOTPRequest, db: Session = Depends(get_db)):
+def resend_otp(req: ResendOTPRequest, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.email == req.email).first()
     if not user:
         raise HTTPException(
@@ -315,7 +315,7 @@ def resend_otp(req: ResendOTPRequest, db: Session = Depends(get_db)):
     db.commit()
 
     purpose = "Account Verification" if not user.is_verified else "Login Authentication"
-    send_otp_email(user.email, otp, purpose)
+    background_tasks.add_task(send_otp_email, user.email, otp, purpose)
 
     return AuthStepResponse(
         message=f"A new 6-digit OTP code has been sent to {user.email}.",
