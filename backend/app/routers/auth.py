@@ -2,6 +2,7 @@ import os
 import secrets
 import random
 import datetime
+import threading
 import jwt
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, BackgroundTasks
@@ -184,7 +185,7 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
             
             db.commit()
 
-            background_tasks.add_task(send_otp_email, existing_user.email, otp, "Registration Verification")
+            threading.Thread(target=send_otp_email, args=(existing_user.email, otp, "Registration Verification"), daemon=True).start()
 
             return AuthStepResponse(
                 message=f"Account registration pending verification. A dynamic 6-digit security OTP has been instantly sent to {existing_user.email}.",
@@ -227,8 +228,8 @@ def register(user_data: UserRegister, background_tasks: BackgroundTasks, db: Ses
             db.add(new_agent)
             db.commit()
 
-    # Send verification email with OTP in background task (instant response)
-    background_tasks.add_task(send_otp_email, new_user.email, otp, "Registration Verification")
+    # Send verification email with OTP in background thread (instant socket dispatch)
+    threading.Thread(target=send_otp_email, args=(new_user.email, otp, "Registration Verification"), daemon=True).start()
 
     return AuthStepResponse(
         message=f"Registration successful! A dynamic 6-digit security OTP code has been sent to {new_user.email}.",
@@ -376,7 +377,7 @@ def resend_otp(req: ResendOTPRequest, background_tasks: BackgroundTasks, db: Ses
     db.commit()
 
     purpose = "Account Verification" if not user.is_verified else "Login Authentication"
-    background_tasks.add_task(send_otp_email, user.email, otp, purpose)
+    threading.Thread(target=send_otp_email, args=(user.email, otp, purpose), daemon=True).start()
 
     return AuthStepResponse(
         message=f"A new dynamic 6-digit OTP code has been instantly sent to {user.email}.",
