@@ -616,188 +616,186 @@ export const Header: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Slide-out Drawer Navigation */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              onClick={() => setMobileMenuOpen(false)}
-              className="fixed inset-0 z-40 bg-black/50 md:hidden"
-            />
-            <motion.div
-              initial={{ x: "100%" }}
-              animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
-              className="md:hidden fixed top-0 right-0 bottom-0 w-4/5 max-w-sm bg-surface z-50 px-6 py-6 space-y-4 font-inter text-sm shadow-2xl overflow-y-auto"
-            >
-              <div className="flex items-center justify-between border-b border-line pb-4">
-                <span className="font-fraunces font-bold text-xl text-ink">Navigation</span>
-                <button
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-1 text-ink-soft hover:text-ink font-bold text-lg cursor-pointer"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <div className="space-y-2 border-b border-line pb-4">
-                <span className="text-xs font-semibold text-brass block">Properties & Search</span>
-                <Link
-                  href="/listings"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/listings" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  All Properties
-                </Link>
-                <Link
-                  href="/listings?type=For+Sale"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-1.5 text-ink-soft hover:text-ink px-1"
-                >
-                  Homes For Sale
-                </Link>
-                <Link
-                  href="/listings?type=For+Rent"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-1.5 text-ink-soft hover:text-ink px-1"
-                >
-                  Homes For Rent
-                </Link>
-                <Link
-                  href="/listings?type=Luxury+Villa"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="block py-1.5 text-ink-soft hover:text-ink px-1"
-                >
-                  Luxury Villas & Penthouses
-                </Link>
-              </div>
-
-              <div className="space-y-2 border-b border-line pb-4">
-                <span className="text-xs font-semibold text-brass block">Real Estate Tools &amp; Discovery</span>
-                <Link
-                  href="/open-houses"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  🗓️ Weekend Open Houses
-                </Link>
-                <Link
-                  href="/sell"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/sell" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  🏷️ Sell &amp; List Your Home
-                </Link>
-                <Link
-                  href="/home-value"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/home-value" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  📈 Home Valuation Estimator
-                </Link>
-                <Link
-                  href="/neighborhoods"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  🏘️ Neighborhood Explorer
-                </Link>
-                <Link
-                  href="/schools"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/schools" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  🎓 Texas School Finder
-                </Link>
-                <Link
-                  href="/drive-time"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  ⏱️ Commute &amp; Drive-Time Search
-                </Link>
-                <Link
-                  href="/compare"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname === "/compare" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  📊 Side-by-Side Property Comparison
-                </Link>
-                <button
-                  onClick={() => {
-                    setMobileMenuOpen(false);
-                    setShowMortgageModal(true);
-                  }}
-                  className="block w-full text-left py-1.5 font-medium text-ink hover:text-brass cursor-pointer px-1"
-                >
-                  🧮 30-Year Mortgage Calculator
-                </button>
-                <Link
-                  href="/agents"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className={`block py-1.5 font-medium transition-colors ${pathname.startsWith("/agents") ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
-                    }`}
-                >
-                  🏛 Real Estate Agents Directory
-                </Link>
-              </div>
-
-              <div className="pt-2 flex flex-col gap-3">
-                {user ? (
-                  <>
-                    <div className="px-3 py-2 bg-bg rounded-xl border border-line flex items-center gap-3">
-                      <span className="w-8 h-8 rounded-full bg-brass text-white font-medium text-sm flex items-center justify-center">
-                        {user.full_name.charAt(0)}
-                      </span>
-                      <div>
-                        <span className="block text-sm font-medium text-ink">{user.full_name}</span>
-                        <span className="block text-xs text-ink-soft capitalize">{user.role}</span>
-                      </div>
-                    </div>
-                    <Link href="/account/favorites" onClick={() => setMobileMenuOpen(false)} className="block text-center py-2 text-sm font-medium text-ink border border-line rounded-lg hover:border-brass">
-                      ♥ Favorites ({favoriteCount})
-                    </Link>
-                    <button
-                      onClick={() => { setMobileMenuOpen(false); logout(); }}
-                      className="w-full py-2 text-sm font-medium text-danger border border-danger/30 rounded-lg hover:bg-danger/10 cursor-pointer"
-                    >
-                      Sign Out
-                    </button>
-                  </>
-                ) : (
-                  <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block text-center py-2.5 text-sm font-medium text-ink border border-line rounded-lg hover:border-brass hover:text-brass">
-                    Sign In →
-                  </Link>
-                )}
-                {(!user || user?.role === "agent") && (
-                  <Button variant="brass" size="md" onClick={() => { setMobileMenuOpen(false); handleListPropertyClick(); }} className="w-full justify-center">
-                    + List Property
-                  </Button>
-                )}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* ------------------- INTERACTIVE PORTAL MODALS ------------------- */}
+      {/* Mobile Slide-out Drawer Navigation & Interactive Modals */}
 
       {mounted && createPortal(
         <>
-          {/* 1. MORTGAGE CALCULATOR MODAL */}
+          {/* Mobile Slide-out Drawer Navigation */}
+          <AnimatePresence>
+            {mobileMenuOpen && (
+              <>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  onClick={() => setMobileMenuOpen(false)}
+                  className="fixed inset-0 z-[999998] bg-black/60 backdrop-blur-xs md:hidden"
+                />
+                <motion.div
+                  initial={{ x: "100%" }}
+                  animate={{ x: 0 }}
+                  exit={{ x: "100%" }}
+                  transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                  className="md:hidden fixed top-0 right-0 bottom-0 w-4/5 max-w-sm bg-surface z-[999999] px-6 py-6 space-y-4 font-inter text-sm shadow-2xl overflow-y-auto"
+                >
+                  <div className="flex items-center justify-between border-b border-line pb-4">
+                    <span className="font-fraunces font-bold text-xl text-ink">Navigation</span>
+                    <button
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="p-1 text-ink-soft hover:text-ink font-bold text-lg cursor-pointer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  <div className="space-y-2 border-b border-line pb-4">
+                    <span className="text-xs font-semibold text-brass block">Properties & Search</span>
+                    <Link
+                      href="/listings"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/listings" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      All Properties
+                    </Link>
+                    <Link
+                      href="/listings?type=For+Sale"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block py-1.5 text-ink-soft hover:text-ink px-1"
+                    >
+                      Homes For Sale
+                    </Link>
+                    <Link
+                      href="/listings?type=For+Rent"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block py-1.5 text-ink-soft hover:text-ink px-1"
+                    >
+                      Homes For Rent
+                    </Link>
+                    <Link
+                      href="/listings?type=Luxury+Villa"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className="block py-1.5 text-ink-soft hover:text-ink px-1"
+                    >
+                      Luxury Villas & Penthouses
+                    </Link>
+                  </div>
+
+                  <div className="space-y-2 border-b border-line pb-4">
+                    <span className="text-xs font-semibold text-brass block">Real Estate Tools &amp; Discovery</span>
+                    <Link
+                      href="/open-houses"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/open-houses" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      🗓️ Weekend Open Houses
+                    </Link>
+                    <Link
+                      href="/sell"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/sell" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      🏷️ Sell &amp; List Your Home
+                    </Link>
+                    <Link
+                      href="/home-value"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/home-value" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      📈 Home Valuation Estimator
+                    </Link>
+                    <Link
+                      href="/neighborhoods"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/neighborhoods" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      🏘️ Neighborhood Explorer
+                    </Link>
+                    <Link
+                      href="/schools"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/schools" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      🎓 Texas School Finder
+                    </Link>
+                    <Link
+                      href="/drive-time"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/drive-time" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      ⏱️ Commute &amp; Drive-Time Search
+                    </Link>
+                    <Link
+                      href="/compare"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname === "/compare" ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      📊 Side-by-Side Property Comparison
+                    </Link>
+                    <button
+                      onClick={() => {
+                        setMobileMenuOpen(false);
+                        setShowMortgageModal(true);
+                      }}
+                      className="block w-full text-left py-1.5 font-medium text-ink hover:text-brass cursor-pointer px-1"
+                    >
+                      🧮 30-Year Mortgage Calculator
+                    </button>
+                    <Link
+                      href="/agents"
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`block py-1.5 font-medium transition-colors ${pathname.startsWith("/agents") ? "bg-brass/10 text-brass font-bold px-2.5 rounded-lg border-l-2 border-brass" : "text-ink hover:text-brass"
+                        }`}
+                    >
+                      🏛 Real Estate Agents Directory
+                    </Link>
+                  </div>
+
+                  <div className="pt-2 flex flex-col gap-3">
+                    {user ? (
+                      <>
+                        <div className="px-3 py-2 bg-bg rounded-xl border border-line flex items-center gap-3">
+                          <span className="w-8 h-8 rounded-full bg-brass text-white font-medium text-sm flex items-center justify-center">
+                            {user.full_name.charAt(0)}
+                          </span>
+                          <div>
+                            <span className="block text-sm font-medium text-ink">{user.full_name}</span>
+                            <span className="block text-xs text-ink-soft capitalize">{user.role}</span>
+                          </div>
+                        </div>
+                        <Link href="/account/favorites" onClick={() => setMobileMenuOpen(false)} className="block text-center py-2 text-sm font-medium text-ink border border-line rounded-lg hover:border-brass">
+                          ♥ Favorites ({favoriteCount})
+                        </Link>
+                        <button
+                          onClick={() => { setMobileMenuOpen(false); logout(); }}
+                          className="w-full py-2 text-sm font-medium text-danger border border-danger/30 rounded-lg hover:bg-danger/10 cursor-pointer"
+                        >
+                          Sign Out
+                        </button>
+                      </>
+                    ) : (
+                      <Link href="/login" onClick={() => setMobileMenuOpen(false)} className="block text-center py-2.5 text-sm font-medium text-ink border border-line rounded-lg hover:border-brass hover:text-brass">
+                        Sign In →
+                      </Link>
+                    )}
+                    {(!user || user?.role === "agent") && (
+                      <Button variant="brass" size="md" onClick={() => { setMobileMenuOpen(false); handleListPropertyClick(); }} className="w-full justify-center">
+                        + List Property
+                      </Button>
+                    )}
+                  </div>
+                </motion.div>
+              </>
+            )}
+          </AnimatePresence>
           <AnimatePresence>
             {showMortgageModal && (
               <div className="fixed inset-0 z-[999999] overflow-y-auto p-4 sm:p-6 flex items-start sm:items-center justify-center pt-20 sm:pt-24 pb-12">
