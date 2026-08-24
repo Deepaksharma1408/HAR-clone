@@ -108,7 +108,7 @@ function LoginFormContent() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="architect@estateline.com"
+                placeholder="Enter Email"
                 disabled={loading}
               />
 
@@ -118,7 +118,7 @@ function LoginFormContent() {
                 required
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
+                placeholder="Enter Password"
                 disabled={loading}
               />
 

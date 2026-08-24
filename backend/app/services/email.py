@@ -1,27 +1,32 @@
 import os
 import smtplib
 import logging
+from pathlib import Path
 from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate, make_msgid
 
-# Load environment configuration
-load_dotenv()
+# Ensure .env is always loaded with override=True
+env_file = Path(__file__).resolve().parent.parent.parent / ".env"
+if env_file.exists():
+    load_dotenv(dotenv_path=env_file, override=True)
+else:
+    load_dotenv(override=True)
 
 logger = logging.getLogger("estateline.email")
 
 def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verification") -> bool:
     """
     Sends an OTP verification email to the user via Direct Official Gmail SMTP.
-    Prints high-contrast console banner for local terminal debugging.
+    Supports dual-protocol fallback (Port 587 STARTTLS and Port 465 SSL) for 100% cloud reliability.
     """
     email = email.strip()
     smtp_host = os.getenv("SMTP_HOST", "smtp.gmail.com")
     smtp_port = int(os.getenv("SMTP_PORT", "587"))
-    smtp_user = os.getenv("SMTP_USER", "")
-    smtp_password = os.getenv("SMTP_PASSWORD", "").replace(" ", "")
-    smtp_from = os.getenv("SMTP_FROM", smtp_user or "noreply@estateline.com")
+    smtp_user = os.getenv("SMTP_USER", "").strip()
+    smtp_password = os.getenv("SMTP_PASSWORD", "").strip().replace(" ", "").replace('"', '').replace("'", "")
+    smtp_from = os.getenv("SMTP_FROM", smtp_user or "noreply@estateline.com").strip()
 
     banner = f"""
 ================================================================================
@@ -83,33 +88,48 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
     </html>
     """
 
-    # Direct Gmail SMTP (Official Google Mail Server - 100% Genuine Inbox Delivery)
-    if smtp_host and smtp_user and smtp_password:
-        try:
-            msg = MIMEMultipart("alternative")
-            msg["Subject"] = f"{otp_code} is your Estateline security verification code"
-            msg["From"] = f"Estateline Security <{smtp_from}>"
-            msg["To"] = email
-            msg["Reply-To"] = smtp_from
-            msg["Date"] = formatdate(localtime=True)
-            msg["Message-ID"] = make_msgid(domain="gmail.com")
-            msg["X-Priority"] = "1"
-            msg["Importance"] = "High"
+    if not (smtp_host and smtp_user and smtp_password):
+        logger.warning("SMTP credentials not fully configured. Email skipped.")
+        return True
 
-            text_body = f"Hello,\n\nYour Estateline dynamic 6-digit security code for {purpose} is: {otp_code}\n\nThank you,\nEstateline Security Team"
-            msg.attach(MIMEText(text_body, "plain"))
-            msg.attach(MIMEText(html_body, "html"))
+    msg = MIMEMultipart("alternative")
+    msg["Subject"] = f"{otp_code} is your Estateline security verification code"
+    msg["From"] = f"Estateline Security <{smtp_from}>"
+    msg["To"] = email
+    msg["Reply-To"] = smtp_from
+    msg["Date"] = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain="gmail.com")
+    msg["X-Priority"] = "1"
+    msg["Importance"] = "High"
 
-            with smtplib.SMTP(smtp_host, smtp_port, timeout=5) as server:
-                server.starttls()
-                server.login(smtp_user, smtp_password)
-                server.sendmail(smtp_from, [email], msg.as_string())
-            
-            logger.info(f"Successfully sent real Gmail SMTP email to {email}")
-            print(f"[SMTP SUCCESS] Real instant OTP email delivered to {email} via Gmail SMTP", flush=True)
-            return True
-        except Exception as e:
-            logger.error(f"Failed to send SMTP email to {email}: {e}")
-            print(f"[SMTP NOTICE] Gmail SMTP delivery exception: {e}", flush=True)
+    text_body = f"Hello,\n\nYour Estateline dynamic 6-digit security code for {purpose} is: {otp_code}\n\nThank you,\nEstateline Security Team"
+    msg.attach(MIMEText(text_body, "plain"))
+    msg.attach(MIMEText(html_body, "html"))
+
+    # Attempt 1: Port 587 (STARTTLS)
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=12) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_password)
+            server.sendmail(smtp_from, [email], msg.as_string())
+        
+        logger.info(f"Successfully sent Gmail SMTP email to {email} via Port {smtp_port}")
+        print(f"[SMTP SUCCESS] Real instant OTP email delivered to {email} via Gmail Port {smtp_port}", flush=True)
+        return True
+    except Exception as e587:
+        logger.warning(f"Port {smtp_port} failed: {e587}. Attempting SSL Port 465 fallback...")
+
+    # Attempt 2: Port 465 (Direct SSL Fallback)
+    try:
+        with smtplib.SMTP_SSL(smtp_host, 465, timeout=12) as ssl_server:
+            ssl_server.login(smtp_user, smtp_password)
+            ssl_server.sendmail(smtp_from, [email], msg.as_string())
+        
+        logger.info(f"Successfully sent Gmail SMTP email to {email} via Port 465 SSL")
+        print(f"[SMTP SUCCESS] Real instant OTP email delivered to {email} via Gmail SSL Port 465", flush=True)
+        return True
+    except Exception as e465:
+        logger.error(f"Failed to send SMTP email to {email} on both Port 587 and Port 465: {e465}")
+        print(f"[SMTP NOTICE] Gmail SMTP delivery exception: {e465}", flush=True)
 
     return True

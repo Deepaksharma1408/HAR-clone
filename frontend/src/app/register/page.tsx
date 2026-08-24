@@ -221,7 +221,7 @@ export default function RegisterPage() {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  placeholder="Rhea Malhotra"
+                  placeholder="Enter Name"
                   disabled={loading}
                 />
 
@@ -231,7 +231,7 @@ export default function RegisterPage() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="rhea@estateline.com"
+                  placeholder="Enter Email"
                   disabled={loading}
                 />
 
@@ -241,7 +241,7 @@ export default function RegisterPage() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Min. 8 characters"
+                  placeholder="Enter Password"
                   disabled={loading}
                 />
 
