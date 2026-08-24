@@ -6,6 +6,7 @@ import logging
 from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+from email.utils import formatdate, make_msgid
 
 # Load environment configuration
 load_dotenv()
@@ -93,9 +94,14 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
     if smtp_host and smtp_user and smtp_password and not smtp_password.startswith("xkeysib-"):
         try:
             msg = MIMEMultipart("alternative")
-            msg["Subject"] = f"[{otp_code}] Your Estateline Security Verification Code"
+            msg["Subject"] = f"{otp_code} is your Estateline security verification code"
             msg["From"] = f"Estateline Security <{smtp_from}>"
             msg["To"] = email
+            msg["Reply-To"] = smtp_from
+            msg["Date"] = formatdate(localtime=True)
+            msg["Message-ID"] = make_msgid(domain="gmail.com")
+            msg["X-Priority"] = "1"
+            msg["Importance"] = "High"
 
             text_body = f"Hello,\n\nYour Estateline 6-digit verification code for {purpose} is: {otp_code}\n\nThis security code expires in 5 minutes.\n\nThank you,\nEstateline Security Team"
             msg.attach(MIMEText(text_body, "plain"))
@@ -119,7 +125,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
             payload = {
                 "sender": {"name": "Estateline Security", "email": smtp_from if "@" in smtp_from else "noreply@estateline.com"},
                 "to": [{"email": email}],
-                "subject": f"[{otp_code}] Your Estateline Security OTP",
+                "subject": f"{otp_code} is your Estateline security verification code",
                 "htmlContent": html_body
             }
 
