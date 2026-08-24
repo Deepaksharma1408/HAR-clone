@@ -99,37 +99,35 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
     msg["Reply-To"] = smtp_from
     msg["Date"] = formatdate(localtime=True)
     msg["Message-ID"] = make_msgid(domain="gmail.com")
-    msg["X-Priority"] = "1"
-    msg["Importance"] = "High"
 
     text_body = f"Hello,\n\nYour Estateline dynamic 6-digit security code for {purpose} is: {otp_code}\n\nThank you,\nEstateline Security Team"
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
 
-    # Attempt 1: Port 587 (STARTTLS)
+    # Primary Instant Delivery: Port 465 Direct SSL (Ultra-Fast < 1.5s Handshake)
     try:
-        with smtplib.SMTP(smtp_host, smtp_port, timeout=12) as server:
+        with smtplib.SMTP_SSL(smtp_host, 465, timeout=8) as ssl_server:
+            ssl_server.login(smtp_user, smtp_password)
+            ssl_server.sendmail(smtp_from, [email], msg.as_string())
+        
+        logger.info(f"Successfully sent instant Gmail SSL email to {email}")
+        print(f"[SMTP SUCCESS] Instant OTP email delivered to {email} via Gmail SSL (Port 465)", flush=True)
+        return True
+    except Exception as e465:
+        logger.warning(f"Port 465 SSL failed: {e465}. Attempting Port {smtp_port} STARTTLS fallback...")
+
+    # Fallback Delivery: Port 587 (STARTTLS)
+    try:
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=8) as server:
             server.starttls()
             server.login(smtp_user, smtp_password)
             server.sendmail(smtp_from, [email], msg.as_string())
         
         logger.info(f"Successfully sent Gmail SMTP email to {email} via Port {smtp_port}")
-        print(f"[SMTP SUCCESS] Real instant OTP email delivered to {email} via Gmail Port {smtp_port}", flush=True)
+        print(f"[SMTP SUCCESS] Instant OTP email delivered to {email} via Gmail Port {smtp_port}", flush=True)
         return True
     except Exception as e587:
-        logger.warning(f"Port {smtp_port} failed: {e587}. Attempting SSL Port 465 fallback...")
-
-    # Attempt 2: Port 465 (Direct SSL Fallback)
-    try:
-        with smtplib.SMTP_SSL(smtp_host, 465, timeout=12) as ssl_server:
-            ssl_server.login(smtp_user, smtp_password)
-            ssl_server.sendmail(smtp_from, [email], msg.as_string())
-        
-        logger.info(f"Successfully sent Gmail SMTP email to {email} via Port 465 SSL")
-        print(f"[SMTP SUCCESS] Real instant OTP email delivered to {email} via Gmail SSL Port 465", flush=True)
-        return True
-    except Exception as e465:
-        logger.error(f"Failed to send SMTP email to {email} on both Port 587 and Port 465: {e465}")
-        print(f"[SMTP NOTICE] Gmail SMTP delivery exception: {e465}", flush=True)
+        logger.error(f"Failed to send SMTP email to {email}: {e587}")
+        print(f"[SMTP NOTICE] Gmail SMTP delivery exception: {e587}", flush=True)
 
     return True
