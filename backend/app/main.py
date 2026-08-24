@@ -11,6 +11,7 @@ else:
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.staticfiles import StaticFiles
 from .routers import health, auth, listings, leads, favorites, alerts, valuation, open_houses, community
 from .database import Base, engine
@@ -28,24 +29,21 @@ app = FastAPI(
     version="0.1.0"
 )
 
+# High-Speed GZip Compression for all API Responses (>500 bytes)
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
 @app.on_event("startup")
 def on_startup():
     start_scheduler()
 
-# CORS Configuration
-origins = [
-    "http://localhost:3000",
-    "http://127.0.0.1:3000",
-    "http://localhost:3001",
-    "http://127.0.0.1:3001",
-]
-
+# High-Speed CORS Configuration with 24-Hour Preflight Caching
 app.add_middleware(
     CORSMiddleware,
     allow_origin_regex=r"https?://.*",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+    max_age=86400,
 )
 
 # Serve uploaded files statically
