@@ -55,7 +55,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
         <div style="padding: 32px 32px 24px;">
           <h2 style="color: #16231C; font-size: 18px; margin: 0 0 12px; font-weight: 600;">{purpose}</h2>
           <p style="font-size: 14px; color: #4B564E; line-height: 1.6; margin: 0 0 24px;">
-            Here is your dynamic 6-digit one-time security code (OTP) for instant account verification:
+            {"Here is your dynamic 6-digit one-time security code (OTP) to reset your password:" if "Password" in purpose else "Here is your dynamic 6-digit one-time security code (OTP) for instant account verification:"}
           </p>
           
           <!-- OTP Box -->
@@ -68,7 +68,7 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
           <!-- Notice -->
           <div style="background-color: #FAF9F6; border-left: 3px solid #B8862E; padding: 12px 16px; border-radius: 4px; margin-bottom: 24px;">
             <p style="margin: 0; font-size: 12px; color: #6B7280; line-height: 1.5;">
-              ⚡ <strong>Instant Dynamic Security Code.</strong> Estateline representatives will never ask you for this code. Do not share it with anyone.
+              ⚡ <strong>Valid for 30 minutes.</strong> Estateline representatives will never ask you for this code. Do not share it with anyone.
             </p>
           </div>
 
@@ -93,14 +93,15 @@ def send_otp_email(email: str, otp_code: str, purpose: str = "Account Verificati
         return True
 
     msg = MIMEMultipart("alternative")
-    msg["Subject"] = f"{otp_code} is your Estateline security verification code"
+    email_subject = f"Your Password Reset Code: {otp_code} - Estateline" if "Password" in purpose else f"{otp_code} is your Estateline verification code"
+    msg["Subject"] = email_subject
     msg["From"] = f"Estateline Security <{smtp_from}>"
     msg["To"] = email
     msg["Reply-To"] = smtp_from
     msg["Date"] = formatdate(localtime=True)
     msg["Message-ID"] = make_msgid(domain="gmail.com")
 
-    text_body = f"Hello,\n\nYour Estateline dynamic 6-digit security code for {purpose} is: {otp_code}\n\nThank you,\nEstateline Security Team"
+    text_body = f"Hello,\n\nYour Estateline 6-digit security code for {purpose} is: {otp_code}\n\nThis code is valid for 30 minutes.\n\nThank you,\nEstateline Security Team"
     msg.attach(MIMEText(text_body, "plain"))
     msg.attach(MIMEText(html_body, "html"))
 

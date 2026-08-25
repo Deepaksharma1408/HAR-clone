@@ -7,6 +7,7 @@ import jwt
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException, status, Response, Request, BackgroundTasks
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from ..database import get_db
 from ..models import User, Agent
 from ..schemas import UserRegister, UserLogin, UserResponse, VerifyOTPRequest, ResendOTPRequest, AuthStepResponse, ForgotPasswordRequest, ResetPasswordRequest
@@ -389,17 +390,21 @@ def resend_otp(req: ResendOTPRequest, background_tasks: BackgroundTasks, db: Ses
 @router.post("/forgot-password", response_model=AuthStepResponse)
 def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
     email_clean = validate_email_address(req.email)
-    user = db.query(User).filter(User.email == email_clean).first()
+    user = db.query(User).filter(func.lower(User.email) == email_clean).first()
+    if not user:
+        user = db.query(User).filter(User.email.ilike(email_clean)).first()
+        
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="No account found with this email address.",
+            detail="No account found with this email address. Please make sure you have registered first.",
         )
 
     otp = generate_6digit_otp()
     user.otp_code = otp
     user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
     db.commit()
+    db.refresh(user)
 
     threading.Thread(target=send_otp_email, args=(user.email, otp, "Password Reset"), daemon=True).start()
 
@@ -413,7 +418,10 @@ def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
 @router.post("/reset-password")
 def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     email_clean = validate_email_address(req.email)
-    user = db.query(User).filter(User.email == email_clean).first()
+    user = db.query(User).filter(func.lower(User.email) == email_clean).first()
+    if not user:
+        user = db.query(User).filter(User.email.ilike(email_clean)).first()
+
     if not user:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -445,6 +453,7 @@ def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
     db.commit()
 
     return {"status": "success", "message": "Password has been successfully reset. Please log in with your new password."}
+
 
 
 @router.get("/me", response_model=UserResponse)
