@@ -19,11 +19,14 @@ function LoginFormContent() {
   const emailParam = searchParams?.get("email") || "";
   const isVerified = searchParams?.get("verified") === "true";
   const isExisting = searchParams?.get("existing") === "true";
+  const isReset = searchParams?.get("reset") === "true";
 
   const [email, setEmail] = useState(emailParam);
   const [password, setPassword] = useState("");
   const [infoMessage] = useState<string | null>(
-    isVerified
+    isReset
+      ? "✅ Password reset successfully! Please sign in with your new password."
+      : isVerified
       ? "🎉 Account verified successfully! Please log in below with your email & password."
       : isExisting
       ? "👋 Welcome back! An account with this email already exists. Please enter your password to sign in."
@@ -112,15 +115,27 @@ function LoginFormContent() {
                 disabled={loading}
               />
 
-              <Input
-                label="Password"
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter Password"
-                disabled={loading}
-              />
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-[13px] font-medium text-ink-soft">
+                    Password
+                  </label>
+                  <Link
+                    href={`/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ""}`}
+                    className="text-xs text-brass hover:text-brass-deep font-medium transition-colors"
+                  >
+                    Forgot Password?
+                  </Link>
+                </div>
+                <Input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter Password"
+                  disabled={loading}
+                />
+              </div>
 
               <Button
                 type="submit"

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Depends, HTTPException, status, Response, Request
 from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models import User, Agent
-from ..schemas import UserRegister, UserLogin, UserResponse, VerifyOTPRequest, ResendOTPRequest, AuthStepResponse
+from ..schemas import UserRegister, UserLogin, UserResponse, VerifyOTPRequest, ResendOTPRequest, AuthStepResponse, ForgotPasswordRequest, ResetPasswordRequest
 from ..services.email import send_otp_email
 
 router = APIRouter(prefix="/auth", tags=["auth"])
@@ -386,6 +386,67 @@ def resend_otp(req: ResendOTPRequest, background_tasks: BackgroundTasks, db: Ses
     )
 
 
+@router.post("/forgot-password", response_model=AuthStepResponse)
+def forgot_password(req: ForgotPasswordRequest, db: Session = Depends(get_db)):
+    email_clean = validate_email_address(req.email)
+    user = db.query(User).filter(User.email == email_clean).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email address.",
+        )
+
+    otp = generate_6digit_otp()
+    user.otp_code = otp
+    user.otp_expires_at = datetime.datetime.utcnow() + datetime.timedelta(minutes=30)
+    db.commit()
+
+    threading.Thread(target=send_otp_email, args=(user.email, otp, "Password Reset"), daemon=True).start()
+
+    return AuthStepResponse(
+        message=f"A 6-digit password reset OTP has been sent to {user.email}.",
+        email=user.email,
+        requires_otp=True
+    )
+
+
+@router.post("/reset-password")
+def reset_password(req: ResetPasswordRequest, db: Session = Depends(get_db)):
+    email_clean = validate_email_address(req.email)
+    user = db.query(User).filter(User.email == email_clean).first()
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No account found with this email address.",
+        )
+
+    if not user.otp_code or user.otp_code != req.otp_code.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid 6-digit verification code.",
+        )
+
+    if user.otp_expires_at and datetime.datetime.utcnow() > user.otp_expires_at:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Verification code has expired. Please request a new code.",
+        )
+
+    if len(req.new_password) < 6:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Password must be at least 6 characters long.",
+        )
+
+    user.hashed_password = hash_password(req.new_password)
+    user.is_verified = True
+    user.otp_code = None
+    user.otp_expires_at = None
+    db.commit()
+
+    return {"status": "success", "message": "Password has been successfully reset. Please log in with your new password."}
+
+
 @router.get("/me", response_model=UserResponse)
 def get_me(current_user: User = Depends(get_current_user)):
     return current_user
@@ -400,3 +461,4 @@ def logout(response: Response):
         httponly=True
     )
     return {"status": "success", "message": "Successfully logged out."}
+

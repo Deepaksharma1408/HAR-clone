@@ -47,6 +47,15 @@ class AuthStepResponse(BaseModel):
     otp_dev: str | None = None
     already_exists: bool = False
 
+class ForgotPasswordRequest(BaseModel):
+    email: EmailStr
+
+class ResetPasswordRequest(BaseModel):
+    email: EmailStr
+    otp_code: str
+    new_password: str
+
+
 # --- Listings Schemas ---
 
 class ListingImageResponse(BaseModel):
