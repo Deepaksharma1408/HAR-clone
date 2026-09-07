@@ -824,7 +824,7 @@ export const Header: React.FC = () => {
           </AnimatePresence>
           <AnimatePresence>
             {showMortgageModal && (
-              <div className="fixed inset-0 z-[999999] overflow-y-auto p-4 sm:p-6 flex items-start sm:items-center justify-center pt-20 sm:pt-24 pb-12">
+              <div className="fixed inset-0 z-[999999] overflow-y-auto p-4 sm:p-6 flex items-center justify-center">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -839,7 +839,7 @@ export const Header: React.FC = () => {
                   transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   className="max-w-lg w-full relative z-10 my-auto shadow-2xl rounded-2xl"
                 >
-                  <Card hoverable={false} className="w-full bg-surface relative space-y-6 rounded-2xl shadow-2xl p-6 sm:p-8">
+                  <Card hoverable={false} className="w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto bg-surface relative space-y-4 sm:space-y-5 rounded-2xl shadow-2xl p-5 sm:p-7 my-auto">
                     <button
                       onClick={() => setShowMortgageModal(false)}
                       className="absolute top-4 right-4 text-ink-soft hover:text-ink font-bold text-xl cursor-pointer"
@@ -973,7 +973,7 @@ export const Header: React.FC = () => {
           {/* 2. HOME VALUATION MODAL */}
           <AnimatePresence>
             {showHomeValuationModal && (
-              <div className="fixed inset-0 z-[999999] overflow-y-auto p-4 sm:p-6 flex items-start sm:items-center justify-center pt-20 sm:pt-24 pb-12">
+              <div className="fixed inset-0 z-[999999] overflow-y-auto p-4 sm:p-6 flex items-center justify-center">
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -991,7 +991,7 @@ export const Header: React.FC = () => {
                   transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
                   className="max-w-lg w-full relative z-10 my-auto shadow-2xl rounded-2xl"
                 >
-                  <Card hoverable={false} className="w-full bg-surface relative space-y-6 rounded-2xl shadow-2xl p-6 sm:p-8">
+                  <Card hoverable={false} className="w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto bg-surface relative space-y-4 sm:space-y-5 rounded-2xl shadow-2xl p-5 sm:p-7 my-auto">
                     <button
                       onClick={() => {
                         setShowHomeValuationModal(false);

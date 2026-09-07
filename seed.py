@@ -6,7 +6,7 @@ import datetime
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 from app.database import SessionLocal, Base, engine
-from app.models import User, Agent, Listing, ListingImage, PriceHistoryEntry
+from app.models import User, Agent, Listing, ListingImage, PriceHistoryEntry, Favorite, Lead, SavedAlert
 from app.routers.auth import hash_password
 
 def seed_db():
@@ -73,6 +73,30 @@ def seed_db():
             db.flush()
             
             agent_map[data["email"]] = agent
+
+        # Demo Buyers
+        buyers_data = [
+            {
+                "email": "buyer@estateline.com",
+                "name": "Alex Morgan (Demo Buyer)",
+            },
+            {
+                "email": "deepak@estateline.com",
+                "name": "Deepak Sharma",
+            }
+        ]
+        for bdata in buyers_data:
+            print(f"Creating buyer user profile for: {bdata['name']}")
+            hashed_pw = hash_password("password123")
+            buser = User(
+                email=bdata["email"],
+                hashed_password=hashed_pw,
+                role="buyer",
+                full_name=bdata["name"],
+                is_verified=True
+            )
+            db.add(buser)
+            db.flush()
 
         # 36 Detailed Sample Listings (6 for each Buy/Rent category) with Unique High-Res Photos
         listings_data = [
@@ -752,8 +776,44 @@ def seed_db():
                 )
                 db.add(history_entry)
 
+        # Seed Favorites, Saved Alerts, and Leads for demo buyers
+        first_buyer = db.query(User).filter(User.email == "buyer@estateline.com").first()
+        all_listings = db.query(Listing).all()
+        if first_buyer and len(all_listings) >= 7:
+            print("Seeding sample Favorites, Saved Alerts, and Inquiry Leads for Demo Accounts...")
+            # Seed 4 Favorites for Alex Morgan
+            for fav_idx in [0, 2, 4, 6]:
+                db.add(Favorite(user_id=first_buyer.id, listing_id=all_listings[fav_idx].id))
+            
+            # Seed Saved Alerts
+            db.add(SavedAlert(
+                user_id=first_buyer.id,
+                name="Katy Luxury Homes Alert",
+                filters='{"city": "Katy", "min_price": 500000}'
+            ))
+
+            # Seed Leads / Inquiries on Agent Listings
+            db.add(Lead(
+                listing_id=all_listings[0].id,
+                name="Alex Morgan",
+                phone="832-555-0199",
+                message="Hi Rhea! I am very interested in touring this Katy home. Is it available this Saturday afternoon?"
+            ))
+            db.add(Lead(
+                listing_id=all_listings[3].id,
+                name="Alex Morgan",
+                phone="832-555-0199",
+                message="Hello Sarah, could you provide additional details on HOA fees for River Oaks Blvd?"
+            ))
+            db.add(Lead(
+                listing_id=all_listings[6].id,
+                name="Deepak Sharma",
+                phone="832-555-0211",
+                message="Hi David, looking for commercial lease terms on this property. Please call me back."
+            ))
+
         db.commit()
-        print("Database successfully seeded with 4 agents and 36 detailed listings with photos across all 6 categories!")
+        print("Database successfully seeded with 4 agents, 2 buyers, 36 detailed listings, favorites & leads!")
         
     except Exception as e:
         db.rollback()

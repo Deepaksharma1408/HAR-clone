@@ -224,20 +224,20 @@ export default function OpenHousesPage() {
         {/* RSVP Confirmation / Registration Modal */}
         <AnimatePresence>
           {selectedHouse && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 onClick={() => setSelectedHouse(null)}
-                className="absolute inset-0 bg-black/60 backdrop-blur-xs"
+                className="fixed inset-0 bg-black/60 backdrop-blur-xs"
               />
               <motion.div
                 initial={{ opacity: 0, scale: 0.95, y: 12 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 exit={{ opacity: 0, scale: 0.95, y: 12 }}
                 transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                className="bg-surface p-8 rounded-2xl max-w-md w-full border border-line space-y-5 shadow-2xl relative z-10"
+                className="bg-surface p-6 sm:p-8 rounded-2xl max-w-md w-full max-h-[85vh] sm:max-h-[90vh] overflow-y-auto border border-line space-y-5 shadow-2xl relative z-10 my-auto"
               >
                 {rsvpSuccess ? (
                   <div className="text-center space-y-4">

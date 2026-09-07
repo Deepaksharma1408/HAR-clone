@@ -106,10 +106,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         headers,
         credentials: "include",
       });
-      setUserState(null);
     } catch (err) {
       console.error("Logout error:", err);
+    } finally {
       setUserState(null);
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      }
     }
   };
 

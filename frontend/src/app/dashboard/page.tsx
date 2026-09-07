@@ -72,11 +72,11 @@ export default function AgentDashboardPage() {
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Redirect non-agents to home
+  // Redirect non-agents or logged-out users to login page
   useEffect(() => {
     if (!authLoading) {
       if (!user || user.role !== "agent") {
-        router.push("/");
+        router.push("/login");
       }
     }
   }, [user, authLoading, router]);
